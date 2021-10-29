@@ -6,11 +6,8 @@
 
 .DS_Store
 
-node_modules
-.vscode
-build
+# The cache for docker container dependency
+.cargo
 
-# These pallets maybe placed inside for ease of compilation, but shouldn't be committed
-# chain/pallets/pallet-*
-Cargo.toml.me
-
+# The cache for chain data in container
+.local
