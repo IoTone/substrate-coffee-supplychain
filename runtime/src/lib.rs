@@ -9,7 +9,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 use sp_std::prelude::*;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
-	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, MultiSignature,
+	ApplyExtrinsicResult, generic, create_runtime_str, impl_opaque_keys, MultiSignature,MultiSigner,
 	transaction_validity::{TransactionValidity, TransactionSource},
 };
 use sp_runtime::traits::{
@@ -264,6 +264,14 @@ impl pallet_sudo::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 }
+impl pallet_did::Config for Runtime {
+    type Event = Event;
+    type Public = MultiSigner;
+    type Signature = Signature;
+}
+impl  registrar::Config for Runtime {
+	type Event = Event;
+}
 
 /// Configure the pallet-template in pallets/template.
 impl pallet_template::Config for Runtime {
@@ -286,6 +294,9 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment::{Module, Storage},
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 		// Include the custom logic from the pallet-template in the runtime.
+
+        Registrar: registrar::{Module, Call, Storage, Event<T>, Config<T>},
+		PalletDid: pallet_did::{Module, Call, Storage, Event<T>},
 		TemplateModule: pallet_template::{Module, Call, Storage, Event<T>},
 	}
 );
