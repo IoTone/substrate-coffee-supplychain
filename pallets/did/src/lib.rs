@@ -7,12 +7,10 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use codec::{Decode, Encode};
-    use frame_support::pallet_prelude::EnsureOrigin;
+    use codec::{Decode, Encode}; 
     use frame_support::pallet_prelude::IsType;
     use frame_support::pallet_prelude::OptionQuery;
-    use frame_support::pallet_prelude::ValueQuery;
-    use frame_support::traits::Vec;
+    use frame_support::pallet_prelude::ValueQuery; 
     use frame_support::Blake2_128Concat;
     use frame_support::{
         dispatch::{DispatchResult, DispatchResultWithPostInfo},
@@ -20,11 +18,10 @@ pub mod pallet {
     };
     use frame_system::pallet_prelude::OriginFor;
     use frame_system::pallet_prelude::*;
-    use frame_system::{self as system, ensure_signed, pallet};
+    use frame_system::{ ensure_signed};
     use sp_io::hashing::blake2_256;
-    use sp_runtime::traits::{IdentifyAccount, Verify};
-    use sp_std::if_std;
-
+    use sp_runtime::traits::{IdentifyAccount, Verify}; 
+    use sp_std::{prelude::*, vec::Vec};
     /// Attributes or properties that make an identity.
     #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, Default, RuntimeDebug)]
     pub struct Attribute<BlockNumber, Moment> {
@@ -150,8 +147,8 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
             Self::is_owner(&identity, &who)?;
 
-            let now_timestamp = <pallet_timestamp::Module<T>>::now();
-            let now_block_number = <frame_system::Module<T>>::block_number();
+            let now_timestamp = <pallet_timestamp::Pallet<T>>::now();
+            let now_block_number = <frame_system::Pallet<T>>::block_number();
 
             if <OwnerOf<T>>::contains_key(&identity) {
                 // Update to new owner.
@@ -183,8 +180,8 @@ pub mod pallet {
 
             Self::create_delegate( &who, &identity, &delegate, &delegate_type, valid_for)?;
 
-            let now_timestamp = <pallet_timestamp::Module<T>>::now();
-            let now_block_number = <frame_system::Module<T>>::block_number();
+            let now_timestamp = <pallet_timestamp::Pallet<T>>::now();
+            let now_block_number = <frame_system::Pallet<T>>::block_number();
             <UpdatedBy<T>>::insert(&identity, (who, now_block_number, now_timestamp));
 
             Self::deposit_event(Event::DelegateAdded(
@@ -208,8 +205,8 @@ pub mod pallet {
             Self::valid_listed_delegate(&identity, &delegate_type, &delegate)?;
             ensure!(delegate_type.len() <= 64, Error::<T>::InvalidDelegate);
 
-            let now_timestamp = <pallet_timestamp::Module<T>>::now();
-            let now_block_number = <frame_system::Module<T>>::block_number();
+            let now_timestamp = <pallet_timestamp::Pallet<T>>::now();
+            let now_block_number = <frame_system::Pallet<T>>::block_number();
 
             // Update only the validity period to revoke the delegate.
             <DelegateOf<T>>::mutate(
@@ -249,7 +246,7 @@ pub mod pallet {
             Self::deposit_event(Event::AttributeRevoked(
                 identity,
                 name,
-                <frame_system::Module<T>>::block_number(),
+                <frame_system::Pallet<T>>::block_number(),
             ));
             Ok(().into())
         }
@@ -261,7 +258,7 @@ pub mod pallet {
             Self::is_owner(&identity, &who)?;
             ensure!(name.len() <= 64, Error::<T>::AttributeRemovalFailed);
 
-            let now_block_number = <frame_system::Module<T>>::block_number();
+            let now_block_number = <frame_system::Pallet<T>>::block_number();
             let result = Self::attribute_and_id(&identity, &name);
 
             match result {
@@ -271,7 +268,7 @@ pub mod pallet {
 
             <UpdatedBy<T>>::insert(
                 &identity,
-                (&who, &now_block_number, <pallet_timestamp::Module<T>>::now()),
+                (&who, &now_block_number, <pallet_timestamp::Pallet<T>>::now()),
             );
 
             Self::deposit_event(Event::AttributeDeleted(identity, name, now_block_number));
@@ -351,7 +348,7 @@ pub mod pallet {
             );
 
             let validity = Self::delegate_of((identity, delegate_type, delegate));
-            match validity > Some(<frame_system::Module<T>>::block_number()) {
+            match validity > Some(<frame_system::Pallet<T>>::block_number()) {
                 true => Ok(()),
                 false => Err(Error::<T>::InvalidDelegate.into()),
             }
@@ -372,7 +369,7 @@ pub mod pallet {
                 Error::<T>::InvalidDelegate
             );
 
-            let now_block_number = <frame_system::Module<T>>::block_number();
+            let now_block_number = <frame_system::Pallet<T>>::block_number();
             let validity: T::BlockNumber = match valid_for {
                 Some(blocks) => now_block_number + blocks,
                 None => u32::max_value().into(),
@@ -416,8 +413,8 @@ pub mod pallet {
             valid_for: Option<T::BlockNumber>,
         ) -> DispatchResult {
             Self::is_owner(&identity, &who)?;
-            let now_timestamp = <pallet_timestamp::Module<T>>::now();
-            let now_block_number = <frame_system::Module<T>>::block_number();
+            let now_timestamp = <pallet_timestamp::Pallet<T>>::now();
+            let now_block_number = <frame_system::Pallet<T>>::block_number();
             let mut nonce = Self::nonce_of((&identity, name.to_vec()));
 
             let validity: T::BlockNumber = match valid_for {
@@ -452,8 +449,8 @@ pub mod pallet {
                     identity,
                     (
                         who,
-                        <frame_system::Module<T>>::block_number(),
-                        <pallet_timestamp::Module<T>>::now(),
+                        <frame_system::Pallet<T>>::block_number(),
+                        <pallet_timestamp::Pallet<T>>::now(),
                     ),
                 );
                 Ok(())
@@ -471,7 +468,7 @@ pub mod pallet {
             let result = Self::attribute_and_id(identity, name);
             match result {
                 Some((mut attribute, id)) => {
-                    attribute.validity = <frame_system::Module<T>>::block_number();
+                    attribute.validity = <frame_system::Pallet<T>>::block_number();
                     <AttributeOf<T>>::mutate((&identity, id), |a| *a = attribute);
                 }
                 None => return Err(Error::<T>::AttributeResetFailed.into()),
@@ -482,8 +479,8 @@ pub mod pallet {
                 identity,
                 (
                     who,
-                    <frame_system::Module<T>>::block_number(),
-                    <pallet_timestamp::Module<T>>::now(),
+                    <frame_system::Pallet<T>>::block_number(),
+                    <pallet_timestamp::Pallet<T>>::now(),
                 ),
             );
             Ok(())
@@ -503,7 +500,7 @@ pub mod pallet {
                 None => return Err(Error::<T>::InvalidAttribute.into()),
             };
 
-            if (attr.validity > (<frame_system::Module<T>>::block_number()))
+            if (attr.validity > (<frame_system::Pallet<T>>::block_number()))
                 && (attr.value == value.to_vec())
             {
                 Ok(())
@@ -553,7 +550,7 @@ pub mod pallet {
             Self::is_owner(&transaction.identity, &transaction.signer)?;
             ensure!(transaction.name.len() <= 64, Error::<T>::BadTransaction);
 
-            let now_block_number = <frame_system::Module<T>>::block_number();
+            let now_block_number = <frame_system::Pallet<T>>::block_number();
             let validity = now_block_number + transaction.validity.into();
 
             // If validity was set to 0 in the transaction,
