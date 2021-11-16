@@ -49,7 +49,8 @@ sp-std = { default-features = false, git= 'https://github.com/paritytech/substra
 sp-transaction-pool = { default-features = false, git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'  }
 sp-version = { default-features = false, git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'  }
 # local dependencies
-pallet-template = { default-features = false, path = '../pallets/template', version = '3.0.0' }
+product-registry = { default-features = false,package = 'pallet-product-registry',path = '../pallets/product-registry', version = '3.0.0' }
+product-tracking = { default-features = false,package = 'pallet-product-tracking',path = '../pallets/product-tracking', version = '3.0.0' }
 pallet-did = { default-features = false, path = '../pallets/did', version = '3.0.0' }
 registrar = { default-features = false,package = 'pallet-registrar', path = '../pallets/registrar', version = '3.0.0' }
 
@@ -84,8 +85,7 @@ runtime-benchmarks = [
     'frame-system-benchmarking',
     'frame-system/runtime-benchmarks',
     'hex-literal',
-    'pallet-balances/runtime-benchmarks',
-    'pallet-template/runtime-benchmarks',
+    'pallet-balances/runtime-benchmarks', 
     'pallet-timestamp/runtime-benchmarks',
     'sp-runtime/runtime-benchmarks',
 ]
@@ -121,6 +121,8 @@ std = [
     'sp-transaction-pool/std',
     'sp-version/std',
 	'pallet-did/std',
+	'product-registry/std',
+	'product-tracking/std',
 	'validatorset/std',
 	'rbac/std',
 	'registrar/std'

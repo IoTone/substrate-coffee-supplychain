@@ -55,8 +55,7 @@ use pallet_transaction_payment::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-/// Import the template pallet.
-pub use pallet_template;
+ 
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -472,10 +471,7 @@ impl registrar::Config for Runtime {
     type Event = Event;
 }
 
-/// Configure the pallet-template in pallets/template.
-impl pallet_template::Config for Runtime {
-    type Event = Event;
-}
+ 
 
 impl rbac::Config for Runtime {
     type Event = Event;
@@ -486,6 +482,15 @@ impl rbac::Config for Runtime {
 impl validatorset::Config for Runtime {
     type Event = Event;
 	type AddRemoveOrigin = EnsureRoot<AccountId>;
+}
+impl product_registry::Config for Runtime {
+    type Event = Event;
+    type CreateRoleOrigin = registrar::EnsureOrg<Runtime>;
+}
+
+impl product_tracking::Config for Runtime {
+    type Event = Event;
+    type CreateRoleOrigin = registrar::EnsureOrg<Runtime>;
 }
 impl pallet_randomness_collective_flip::Config for Runtime {}
 impl pallet_session::Config for Runtime {
@@ -534,8 +539,9 @@ construct_runtime!(
         // Include the custom logic from the pallet-template in the runtime.
 
         Registrar: registrar::{Pallet, Call, Storage, Event<T>, Config<T>},
-        PalletDid: pallet_did::{Pallet, Call, Storage, Event<T>},
-        TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>},
+        ProductRegistry: product_registry::{Pallet, Call, Storage, Event<T>},
+        ProductTracking: product_tracking::{Pallet, Call, Storage, Event<T>},
+        PalletDid: pallet_did::{Pallet, Call, Storage, Event<T>}, 
         Rbac: rbac::{Pallet, Call, Storage, Event<T>, Config<T>},
     }
 );

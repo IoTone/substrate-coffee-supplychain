@@ -5,21 +5,21 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{  runtime_print, traits::GetCallMetadata, weights::DispatchInfo};
+use frame_support::{runtime_print, traits::GetCallMetadata, weights::DispatchInfo};
 pub use pallet::*;
 use scale_info::TypeInfo;
-use sp_runtime::{ 
+use sp_runtime::{
     print,
     traits::{DispatchInfoOf, Dispatchable, SignedExtension},
     transaction_validity::{InvalidTransaction, TransactionValidity, TransactionValidityError},
     RuntimeDebug,
 };
-use sp_std::prelude::*; 
+use sp_std::prelude::*;
 
 #[frame_support::pallet]
 pub mod pallet {
     use super::*;
-    use frame_support::{  pallet_prelude::*};
+    use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
 
     #[pallet::config]
@@ -46,11 +46,12 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn roles)]
-    pub type Roles<T: Config> = StorageMap<_, Blake2_128Concat, Role, ()>;
+    pub type Roles<T: Config> = StorageValue<_, Vec<Role>, ValueQuery>;
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
         pub super_admins: Vec<T::AccountId>,
+        pub permissions: Vec<(Role, Vec<T::AccountId>)>,
     }
 
     #[cfg(feature = "std")]
@@ -58,6 +59,7 @@ pub mod pallet {
         fn default() -> Self {
             Self {
                 super_admins: Vec::new(),
+                permissions: Vec::new(),
             }
         }
     }
@@ -68,6 +70,13 @@ pub mod pallet {
         fn build(&self) {
             for admin in &self.super_admins {
                 <SuperAdmins<T>>::insert(admin, ());
+            }
+            for (role, members) in &self.permissions {
+                <Roles<T>>::append(role);
+               
+                for member in members {
+                    <Permissions<T>>::insert((member, role), ());
+                }
             }
         }
     }
@@ -103,7 +112,7 @@ pub mod pallet {
                 permission,
             };
 
-            Roles::<T>::insert(role, ());
+            <Roles<T>>::append(role);
 
             Ok(().into())
         }
@@ -155,7 +164,10 @@ pub mod pallet {
         ///
         /// Only _root_ can add a Super Admin.
         #[pallet::weight(0)]
-        pub fn add_super_admin(origin: OriginFor<T>, account_id: T::AccountId) -> DispatchResultWithPostInfo {
+        pub fn add_super_admin(
+            origin: OriginFor<T>,
+            account_id: T::AccountId,
+        ) -> DispatchResultWithPostInfo {
             T::RbacAdminOrigin::ensure_origin(origin)?;
             <SuperAdmins<T>>::insert(&account_id, ());
             Self::deposit_event(Event::SuperAdminAdded(account_id));
@@ -165,6 +177,8 @@ pub mod pallet {
 }
 
 #[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo)]
+#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+
 pub enum Permission {
     Execute = 1,
     Manage = 2,
@@ -177,19 +191,30 @@ impl Default for Permission {
 }
 
 #[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo)]
+#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+
 pub struct Role {
-    pallet: Vec<u8>,
-    permission: Permission,
+    pub pallet: Vec<u8>,
+    pub permission: Permission,
 }
 
 impl<T: Config> Pallet<T> {
+    fn add_role(role: &Role) -> bool {
+        let roles = Self::roles();
+        if roles.contains(role) {
+            return false;
+        }
+
+        <Roles<T>>::append(role.clone());
+        true
+    }
     pub fn verify_execute_access(account_id: T::AccountId, pallet: Vec<u8>) -> bool {
         let role = Role {
             pallet,
             permission: Permission::Execute,
         };
-
-        if <Roles<T>>::contains_key(&role) && <Permissions<T>>::contains_key((account_id, role)) {
+        let roles = Self::roles();
+        if roles.contains(&role) && <Permissions<T>>::contains_key((account_id, role)) {
             return true;
         }
 
@@ -201,8 +226,8 @@ impl<T: Config> Pallet<T> {
             pallet,
             permission: Permission::Manage,
         };
-
-        if <Roles<T>>::contains_key(&role) && <Permissions<T>>::contains_key((account_id, role)) {
+        let roles = Self::roles();
+        if roles.contains(&role) && <Permissions<T>>::contains_key((account_id, role)) {
             return true;
         }
 
@@ -265,7 +290,7 @@ where
         _len: usize,
     ) -> TransactionValidity {
         let md = call.get_call_metadata();
-       
+
         if <SuperAdmins<T>>::contains_key(who.clone()) {
             print("Access Granted!");
             Ok(Default::default())
@@ -276,7 +301,7 @@ where
             print("Access Granted!");
             Ok(Default::default())
         } else {
-            print("Access Denied!"); 
+            print("Access Denied!");
             Err(InvalidTransaction::Call.into())
         }
     }

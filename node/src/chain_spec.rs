@@ -74,9 +74,20 @@ pub fn development_config() -> Result<ChainSpec, String> {
                     get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
                     get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
                 ],
-                vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+                vec![],
                 // permissions
-
+                vec![
+                    (Role { pallet: b"Rbac".to_vec(), permission: Permission::Execute },
+                    vec![get_account_id_from_seed::<sr25519::Public>("Alice")]),
+                    (Role { pallet: b"Registrar".to_vec(), permission: Permission::Manage },
+                    vec![get_account_id_from_seed::<sr25519::Public>("Alice")]),
+                    (Role { pallet: b"ProductRegistry".to_vec(), permission: Permission::Manage },
+                    vec![get_account_id_from_seed::<sr25519::Public>("Alice")]),
+                    (Role { pallet: b"ProductTracking".to_vec(), permission: Permission::Manage },
+                    vec![get_account_id_from_seed::<sr25519::Public>("Alice")]),
+                    (Role { pallet: b"Balances".to_vec(), permission: Permission::Manage },
+                    vec![get_account_id_from_seed::<sr25519::Public>("Alice")]),
+                ],
                 // organizations
                 vec![(
                     get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -144,6 +155,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                 ],
                 [get_account_id_from_seed::<sr25519::Public>("Alice")].to_vec(),
                 vec![],
+                vec![],
 
                 vec![],
                 true,
@@ -169,6 +181,7 @@ fn testnet_genesis(
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
     super_admins: Vec<AccountId>,
+    permissions: Vec<(Role, Vec<AccountId>)>,
     orgs: Vec<(AccountId, Vec<u8>)>,
     members: Vec<(AccountId, Vec<AccountId>)>,
     _enable_println: bool,
@@ -217,7 +230,8 @@ fn testnet_genesis(
                 })
                 .collect::<Vec<_>>(),
         },
-        rbac: RbacConfig { super_admins },
+
+        rbac: RbacConfig { super_admins,permissions },
         grandpa: GrandpaConfig {
             authorities: vec![],
         },
