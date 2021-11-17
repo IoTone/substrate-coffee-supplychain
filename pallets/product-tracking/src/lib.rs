@@ -6,31 +6,26 @@ mod builders;
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 pub use pallet::*;
+use frame_support::{log::debug};
 
 #[frame_support::pallet]
 pub mod pallet {
     use crate::builders::*;
     use crate::types::*;
     use codec::alloc::string::ToString;
-    use frame_support::dispatch::DispatchResultWithPostInfo; 
+    use frame_support::dispatch::DispatchResultWithPostInfo;
     use frame_support::pallet_prelude::EnsureOrigin;
-    use frame_support::{ 
-        pallet_prelude::*,
-        sp_runtime::offchain::{
-            self as rt_offchain,
-            storage::StorageValueRef,
-            storage_lock::{StorageLock, Time},
-        },
-    };
-    use frame_system::pallet_prelude::OriginFor;
-    use product_registry::ProductId;
     use frame_support::pallet_prelude::IsType;
     use frame_support::pallet_prelude::OptionQuery;
     use frame_support::Blake2_128Concat;
+    use frame_support::{  pallet_prelude::*};
     use frame_system::offchain::SendTransactionTypes;
+    use frame_system::pallet_prelude::OriginFor;
     use frame_system::pallet_prelude::*;
-    use sp_std::vec::Vec;
+    use product_registry::ProductId;
+    use sp_runtime::offchain::storage::StorageValueRef;
     use sp_std::vec;
+    use sp_std::vec::Vec;
     pub const IDENTIFIER_MAX_LENGTH: usize = 36;
     pub const SHIPMENT_MAX_PRODUCTS: usize = 10;
     pub const LISTENER_ENDPOINT: &str = "http://localhost:3005";
@@ -113,7 +108,12 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::weight(10_000)]
-        pub fn register_shipment(origin:OriginFor<T>, id: ShipmentId, owner: T::AccountId, products: Vec<ProductId>) -> DispatchResultWithPostInfo {
+        pub fn register_shipment(
+            origin: OriginFor<T>,
+            id: ShipmentId,
+            owner: T::AccountId,
+            products: Vec<ProductId>,
+        ) -> DispatchResultWithPostInfo {
             T::CreateRoleOrigin::ensure_origin(origin.clone())?;
             let who = ensure_signed(origin)?;
 
@@ -161,15 +161,14 @@ pub mod pallet {
             Ok(().into())
         }
 
-
-        #[pallet::weight (10_000)]
+        #[pallet::weight(10_000)]
         pub fn track_shipment(
-            origin:OriginFor<T>,
+            origin: OriginFor<T>,
             id: ShipmentId,
             operation: ShippingOperation,
-           timestamp: T::Moment,
+            timestamp: T::Moment,
             location: Option<ReadPoint>,
-            readings: Option<Vec<Reading<T::Moment>>>
+            readings: Option<Vec<Reading<T::Moment>>>,
         ) -> DispatchResultWithPostInfo {
             T::CreateRoleOrigin::ensure_origin(origin.clone())?;
             let who = ensure_signed(origin)?;
@@ -181,11 +180,12 @@ pub mod pallet {
             let mut shipment = match <Shipments<T>>::get(&id) {
                 Some(shipment) => match shipment.status {
                     ShipmentStatus::Delivered => Err(<Error<T>>::ShipmentHasBeenDelivered),
-                    ShipmentStatus::InTransit if operation == ShippingOperation::Pickup =>
-                        Err(<Error<T>>::ShipmentIsInTransit),
-                    _ => Ok(shipment)
-                }
-                None => Err(<Error<T>>::ShipmentIsUnknown)
+                    ShipmentStatus::InTransit if operation == ShippingOperation::Pickup => {
+                        Err(<Error<T>>::ShipmentIsInTransit)
+                    }
+                    _ => Ok(shipment),
+                },
+                None => Err(<Error<T>>::ShipmentIsUnknown),
             }?;
 
             // Update shipment status
@@ -234,7 +234,6 @@ pub mod pallet {
         //         Err(_err) => { debug::info!("[product_tracking_ocw] lock is already acquired"); }
         //     };
         // }
-
     }
 
     #[allow(dead_code)]
@@ -290,20 +289,15 @@ pub mod pallet {
         // --- Offchain worker methods ---
 
         fn process_ocw_notifications(block_number: T::BlockNumber) {
-            // Check last processed block
+            //  Check last processed block
             // let last_processed_block_ref =
             //     StorageValueRef::persistent(b"product_tracking_ocw::last_proccessed_block");
-            // let mut last_processed_block: u32 = match last_processed_block_ref.get::<T::BlockNumber>() {
-            //     Some(Some(last_proccessed_block)) if last_proccessed_block >= block_number => {
-            //         debug::info!(
-            //             "[product_tracking_ocw] Skipping: Block {:?} has already been processed.",
-            //             block_number
-            //         );
-            //         return;
-            //     }
+            // let mut last_processed_block: u32 = match last_processed_block_ref.get::<T::BlockNumber>()
+            // {
+                
             //     Some(Some(last_proccessed_block)) => {
-            //        let f =last_proccessed_block;
-            //        return;
+            //         last_proccessed_block.try_into().ok().unwrap() as u32
+
             //     }
             //     None => 0u32, //TODO: define a OCW_MAX_BACKTRACK_PERIOD param
             //     _ => {
@@ -347,7 +341,6 @@ pub mod pallet {
         }
 
         fn notify_listener(ev: &ShippingEvent<T::Moment>) -> Result<(), &'static str> {
-     
             let request =
                 sp_runtime::offchain::http::Request::post(&LISTENER_ENDPOINT, vec![ev.to_string()]);
 

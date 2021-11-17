@@ -10,8 +10,7 @@ pub use pallet::*;
 pub mod pallet {
     use frame_support::{
         dispatch::{DispatchResult, DispatchResultWithPostInfo},
-        pallet_prelude::*,
-        traits::StoredMap,
+        pallet_prelude::*, 
     };
 	use frame_system::pallet_prelude::*;
     use frame_system::pallet_prelude::{ OriginFor};

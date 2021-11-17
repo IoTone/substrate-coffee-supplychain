@@ -5,7 +5,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
-use frame_support::{runtime_print, traits::GetCallMetadata, weights::DispatchInfo};
+use frame_support::{ traits::GetCallMetadata, weights::DispatchInfo};
 pub use pallet::*;
 use scale_info::TypeInfo;
 use sp_runtime::{
@@ -72,7 +72,9 @@ pub mod pallet {
                 <SuperAdmins<T>>::insert(admin, ());
             }
             for (role, members) in &self.permissions {
-                <Roles<T>>::append(role);
+                if !Pallet::<T>::add_role(role) {
+                    panic!("Can't add duplicate roles.");
+                }
                
                 for member in members {
                     <Permissions<T>>::insert((member, role), ());
@@ -87,11 +89,14 @@ pub mod pallet {
         AccessRevoked(T::AccountId, Vec<u8>),
         AccessGranted(T::AccountId, Vec<u8>),
         SuperAdminAdded(T::AccountId),
+        RoleCreated(T::AccountId, Vec<u8>, Vec<u8>),
+
     }
 
     #[pallet::error]
     pub enum Error<T> {
         AccessDenied,
+        RoleExisted
     }
 
     #[pallet::hooks]
@@ -105,15 +110,19 @@ pub mod pallet {
             pallet_name: Vec<u8>,
             permission: Permission,
         ) -> DispatchResultWithPostInfo {
-            ensure_signed(origin)?;
+            let who=ensure_signed(origin)?;
 
             let role = Role {
-                pallet: pallet_name,
-                permission,
+                pallet: pallet_name.clone(),
+                permission:permission.clone(),
             };
 
-            <Roles<T>>::append(role);
-
+            if !Self::add_role(&role) {
+                return Err(Error::<T>::RoleExisted.into());
+            }
+            <Permissions<T>>::insert((who.clone(), role.clone()), ());
+            Self::deposit_event(Event::RoleCreated(who, pallet_name, permission.as_bytes().to_vec()));
+            
             Ok(().into())
         }
 
@@ -183,7 +192,14 @@ pub enum Permission {
     Execute = 1,
     Manage = 2,
 }
-
+impl Permission {
+    fn as_bytes(&self) -> &[u8] {
+        match self {
+            Permission::Execute => b"Permission::Execute",
+            Permission::Manage => b"Permission::Manage",
+        }
+    }
+}
 impl Default for Permission {
     fn default() -> Self {
         Permission::Execute
