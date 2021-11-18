@@ -312,8 +312,11 @@ where
             Ok(Default::default())
         } else if <Pallet<T>>::verify_execute_access(
             who.clone(),
+            md.pallet_name.clone().as_bytes().to_vec(),
+        ) || <Pallet<T>>::verify_manage_access(
+            who.clone(),
             md.pallet_name.as_bytes().to_vec(),
-        ) {
+        )  {
             print("Access Granted!");
             Ok(Default::default())
         } else {
