@@ -2,7 +2,7 @@ use crate as product_registry;
 use crate::*;
 use frame_support::parameter_types;
 use frame_system as system;
-use sp_core::H256;
+use sp_core::{H256, sr25519, Pair};
 use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
@@ -81,6 +81,15 @@ impl<T: Config> EnsureOrigin<T::Origin> for MockOrigin<T> {
             r => Err(T::Origin::from(r)),
         })
     }
+}
+
+// This function basically just builds a genesis storage key/value store according to
+// our desired mockup.
+
+pub fn account_key(s: &str) -> sr25519::Public {
+    sr25519::Pair::from_string(&format!("//{}", s), None)
+        .expect("static values are valid; qed")
+        .public()
 }
 
 

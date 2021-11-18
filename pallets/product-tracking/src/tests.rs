@@ -1,5 +1,7 @@
-use super::*;
+use super::{Config, Shipments, EventCount, AllEvents, EventsOfShipment, ShipmentsOfOrganization};
+use super::Event as RawEvent;
 use crate::{mock::*, types::*, Error};
+
 use fixed::types::I16F16;
 use frame_support::{assert_noop, assert_ok, dispatch};
 use product_registry::ProductId;
@@ -25,17 +27,18 @@ pub fn store_test_shipment<T: Config>(
 }
 
 pub fn store_test_event<T: Config>(shipment_id: ShipmentId, event_type: ShippingEventType) {
+    let t: u32 = 42;
     let event = ShippingEvent {
         event_type,
         shipment_id: shipment_id.clone(),
         location: None,
         readings: vec![],
-        timestamp: 42.into(),
+        timestamp: t.into(),
     };
-    let event_idx = EventCount::get().checked_add(1).unwrap();
-    EventCount::put(event_idx);
-    AllEvents::<T>::insert(event_idx, event);
-    EventsOfShipment::append(shipment_id, event_idx);
+    let event_idx = EventCount::<Test>::get().checked_add(1).unwrap();
+    <EventCount<T>>::put(event_idx);
+    <AllEvents<T>>::insert(event_idx, event);
+    <EventsOfShipment<T>>::append(shipment_id, event_idx);
 }
 
 const TEST_PRODUCT_ID: &str = "00012345678905";
@@ -80,14 +83,14 @@ fn register_shipment_without_products() {
         );
 
         assert!(System::events().iter().any(|er| er.event
-            == TestEvent::product_tracking(Event::ShipmentRegistered(
+            == Event::ProductTracking(RawEvent::ShipmentRegistered(
                 sender,
                 id.clone(),
                 owner
             ))));
 
         assert!(System::events().iter().any(|er| er.event
-            == TestEvent::product_tracking(Event::ShipmentStatusUpdated(
+            == Event::ProductTracking(RawEvent::ShipmentStatusUpdated(
                 sender,
                 id.clone(),
                 1,
@@ -140,14 +143,14 @@ fn register_shipment_with_valid_products() {
         );
 
         assert!(System::events().iter().any(|er| er.event
-            == TestEvent::product_tracking(Event::ShipmentRegistered(
+            == Event::ProductTracking(RawEvent::ShipmentRegistered(
                 sender,
                 id.clone(),
                 owner
             ))));
 
         assert!(System::events().iter().any(|er| er.event
-            == TestEvent::product_tracking(Event::ShipmentStatusUpdated(
+            == Event::ProductTracking(RawEvent::ShipmentStatusUpdated(
                 sender,
                 id.clone(),
                 1,
@@ -361,7 +364,7 @@ fn track_shipment_pickup() {
         ));
 
         // Storage is correctly updated
-        assert_eq!(EventCount::get(), 2);
+        assert_eq!(EventCount::<Test>::get(), 2);
         assert_eq!(
             AllEvents::<Test>::get(2),
             Some(ShippingEvent {
@@ -372,7 +375,7 @@ fn track_shipment_pickup() {
                 timestamp: now,
             })
         );
-        assert_eq!(EventsOfShipment::get(&shipment_id), vec![1, 2]);
+        assert_eq!(EventsOfShipment::<Test>::get(&shipment_id), vec![1, 2]);
 
         // Shipment's status should be updated to 'InTransit'
         assert_eq!(
@@ -387,9 +390,9 @@ fn track_shipment_pickup() {
             })
         );
 
-        // Event is raised
+        // TestEvent is raised
         assert!(System::events().iter().any(|er| er.event
-            == TestEvent::product_tracking(Event::ShipmentStatusUpdated(
+            == Event::ProductTracking(RawEvent::ShipmentStatusUpdated(
                 owner,
                 shipment_id.clone(),
                 2,
@@ -430,7 +433,7 @@ fn track_shipment_delivery() {
         ));
 
         // Storage is correctly updated
-        assert_eq!(EventCount::get(), 3);
+        assert_eq!(EventCount::<Test>::get(), 3);
         assert_eq!(
             AllEvents::<Test>::get(3),
             Some(ShippingEvent {
@@ -441,7 +444,7 @@ fn track_shipment_delivery() {
                 timestamp: now,
             })
         );
-        assert_eq!(EventsOfShipment::get(&shipment_id), vec![1, 2, 3]);
+        assert_eq!(EventsOfShipment::<Test>::get(&shipment_id), vec![1, 2, 3]);
 
         // Shipment's status should be updated to 'Delivered'
         // and delivered timestamp updated
@@ -457,14 +460,22 @@ fn track_shipment_delivery() {
             })
         );
 
-        // Events is raised
-        assert!(System::events().iter().any(|er| er.event
-            == TestEvent::product_tracking(Event::ShipmentStatusUpdated(
+    
+        // println!("{:?}", AllEvents::<Test>::iter().any(|r| {println!("{:?}", r); true}));
+        // println!("{:?}", System::events());
+        println!("{:?}", System::events());
+
+        println!("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
+        // Events are raised
+        assert!(System::events().iter().any(|er| {
+            println!("{:?}", er.event);
+            er.event
+            == Event::ProductTracking(RawEvent::ShipmentStatusUpdated(
                 owner,
                 shipment_id.clone(),
                 3,
                 ShipmentStatus::Delivered
-            ))));
+            ))}));
     })
 }
 
@@ -572,7 +583,7 @@ fn monitor_shipment() {
         ));
 
         // Storage is correctly updated
-        assert_eq!(EventCount::get(), 3);
+        assert_eq!(EventCount::<Test>::get(), 3);
         assert_eq!(
             AllEvents::<Test>::get(3),
             Some(ShippingEvent {
@@ -583,7 +594,7 @@ fn monitor_shipment() {
                 timestamp: now,
             })
         );
-        assert_eq!(EventsOfShipment::get(&shipment_id), vec![1, 2, 3]);
+        assert_eq!(EventsOfShipment::<Test>::get(&shipment_id), vec![1, 2, 3]);
 
         // Shipment's status should still be 'InTransit'
         assert_eq!(
@@ -645,7 +656,7 @@ fn monitor_shipment_with_negative_latlon() {
         ));
 
         // Storage is correctly updated
-        assert_eq!(EventCount::get(), 3);
+        assert_eq!(EventCount::<Test>::get(), 3);
         assert_eq!(
             AllEvents::<Test>::get(3),
             Some(ShippingEvent {
@@ -656,7 +667,7 @@ fn monitor_shipment_with_negative_latlon() {
                 timestamp: now,
             })
         );
-        assert_eq!(EventsOfShipment::get(&shipment_id), vec![1, 2, 3]);
+        assert_eq!(EventsOfShipment::<Test>::get(&shipment_id), vec![1, 2, 3]);
 
         // Shipment's status should still be 'InTransit'
         assert_eq!(

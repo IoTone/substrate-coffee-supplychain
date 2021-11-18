@@ -1,7 +1,9 @@
 // Tests to be written here
 
 use super::*;
-use crate::{mock::*, Error};
+use super::Event as RawEvent;
+use crate::{mock::*, Error, mock::Event};
+
 use frame_support::{assert_noop, assert_ok, dispatch};
 
 pub fn store_test_product<T: Config>(id: ProductId, owner: T::AccountId, registered: T::Moment) {
@@ -55,7 +57,7 @@ fn create_product_without_props() {
 
         // Event is raised
         assert!(System::events().iter().any(|er| er.event
-            == TestEvent::product_registry(Event::ProductRegistered(
+            == Event::ProductRegistry(RawEvent::ProductRegistered(
                 sender,
                 id.clone(),
                 owner
@@ -105,7 +107,7 @@ fn create_product_with_valid_props() {
 
         // Event is raised
         assert!(System::events().iter().any(|er| er.event
-            == TestEvent::product_registry(Event::ProductRegistered(
+            == Event::ProductRegistry(Event::ProductRegistered(
                 sender,
                 id.clone(),
                 owner

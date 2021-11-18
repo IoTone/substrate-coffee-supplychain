@@ -1,8 +1,8 @@
 // Creating mock runtime here
-use crate as product_tracking;
+use crate as pallet_did;
 use crate::*;
 use core::marker::PhantomData;
-use frame_support::{impl_outer_event, parameter_types, traits::EnsureOrigin};
+use frame_support::{parameter_types, traits::EnsureOrigin};
 use frame_system as system;
 use frame_system::RawOrigin;
 use sp_core::{sr25519, Pair, H256};
@@ -17,7 +17,6 @@ pub use pallet_timestamp::Call as TimestampCall;
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
-
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
 	pub enum Test where
@@ -27,7 +26,7 @@ frame_support::construct_runtime!(
 	{
 		System: system::{Pallet, Call, Config, Storage, Event<T>},
         Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
-		ProductTracking: product_tracking::{Pallet, Call, Storage, Event<T>},
+        PalletDid: pallet_did::{Pallet, Call, Storage, Event<T>}, 
 	}
 );
 
@@ -70,11 +69,11 @@ impl pallet_timestamp::Config for Test {
     type WeightInfo = ();
 }
 
-impl product_tracking::Config for Test {
-    type CreateRoleOrigin = MockOrigin<Test>;
+impl pallet_did::Config for Test {
     type Event = Event;
+    type Public = sr25519::Public;
+    type Signature = sr25519::Signature;
 }
-
 
 pub struct MockOrigin<T>(PhantomData<T>);
 

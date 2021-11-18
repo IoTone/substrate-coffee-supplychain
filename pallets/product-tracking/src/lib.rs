@@ -68,7 +68,7 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn event_count)]
-    pub type EventCount<T: Config> = StorageValue<_, u128, ValueQuery>;
+    pub type EventCount<T> = StorageValue<_, u128, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn event_by_idx)]
@@ -77,7 +77,7 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn events_of_shipment)]
-    pub type EventsOfShipment<T: Config> =
+    pub type EventsOfShipment<T> =
         StorageMap<_, Blake2_128Concat, ShipmentId, Vec<ShippingEventIndex>, ValueQuery>;
     #[pallet::storage]
     #[pallet::getter(fn ocw_notifications)]
