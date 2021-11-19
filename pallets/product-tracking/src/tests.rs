@@ -390,7 +390,7 @@ fn track_shipment_pickup() {
             })
         );
 
-        // TestEvent is raised
+        // // TestEvent is raised
         assert!(System::events().iter().any(|er| er.event
             == Event::ProductTracking(RawEvent::ShipmentStatusUpdated(
                 owner,
@@ -460,13 +460,8 @@ fn track_shipment_delivery() {
             })
         );
 
-    
-        // println!("{:?}", AllEvents::<Test>::iter().any(|r| {println!("{:?}", r); true}));
-        // println!("{:?}", System::events());
-        println!("{:?}", System::events());
-
-        println!("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
-        // Events are raised
+     
+      //  Events are raised
         assert!(System::events().iter().any(|er| {
             println!("{:?}", er.event);
             er.event
