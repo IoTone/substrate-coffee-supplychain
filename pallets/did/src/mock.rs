@@ -26,14 +26,13 @@ frame_support::construct_runtime!(
 	{
 		System: system::{Pallet, Call, Config, Storage, Event<T>},
         Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
-        PalletDid: pallet_did::{Pallet, Call, Storage, Event<T>}, 
+        DID: pallet_did::{Pallet, Call, Storage, Event<T>}, 
 	}
 );
 
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
-    // pub const MinimumPeriod: u64 = 1;
 }
 
 impl system::Config for Test {
@@ -78,10 +77,6 @@ impl pallet_did::Config for Test {
 pub struct MockOrigin<T>(PhantomData<T>);
 
 
-// pub type ProductTracking = Pallet<Test>;
-// pub type Timestamp = pallet_timestamp::Pallet<Test>;
-
-
 impl<T: Config> EnsureOrigin<T::Origin> for MockOrigin<T> {
     type Success = T::AccountId;
     fn try_origin(o: T::Origin) -> Result<Self::Success, T::Origin> {
@@ -99,6 +94,10 @@ pub fn account_key(s: &str) -> sr25519::Public {
     sr25519::Pair::from_string(&format!("//{}", s), None)
         .expect("static values are valid; qed")
         .public()
+}
+
+pub fn account_pair(s: &str) -> sr25519::Pair {
+    sr25519::Pair::from_string(&format!("//{}", s), None).expect("static values are valid; qed")
 }
 
 // Offchain worker
