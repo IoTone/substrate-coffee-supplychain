@@ -113,6 +113,6 @@ where
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    let mut t = system::GenesisConfig::default().build_storage::<Test>().unwrap();
+    let t = system::GenesisConfig::default().build_storage::<Test>().unwrap();
     t.into()       
 }

@@ -2,7 +2,7 @@
 use crate as product_tracking;
 use crate::*;
 use core::marker::PhantomData;
-use frame_support::{impl_outer_event, parameter_types, traits::EnsureOrigin};
+use frame_support::{parameter_types, traits::EnsureOrigin};
 use frame_system as system;
 use frame_system::RawOrigin;
 use sp_core::{sr25519, Pair, H256};

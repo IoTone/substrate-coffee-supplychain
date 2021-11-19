@@ -10,7 +10,7 @@ use sp_runtime::{
 use frame_system::RawOrigin;
 
 use core::marker::PhantomData;
-use frame_support::{ traits::{EnsureOrigin}};
+use frame_support:: traits::EnsureOrigin;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
