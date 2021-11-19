@@ -18,9 +18,12 @@ pub mod pallet {
     use crate::builders::*;
     use crate::types::*;
     use codec::alloc::string::ToString;
-    use frame_support::dispatch::DispatchResultWithPostInfo; 
+    use frame_support::dispatch::DispatchResultWithPostInfo;
     use frame_support::pallet_prelude::EnsureOrigin;
-    use frame_support::{ 
+    use frame_support::pallet_prelude::IsType;
+    use frame_support::pallet_prelude::OptionQuery;
+    use frame_support::Blake2_128Concat;
+    use frame_support::{
         pallet_prelude::*,
         sp_runtime::offchain::{
             self as rt_offchain,
@@ -28,15 +31,13 @@ pub mod pallet {
             storage_lock::{StorageLock, Time},
         },
     };
-    use frame_system::pallet_prelude::OriginFor;
-    use product_registry::ProductId;
-    use frame_support::pallet_prelude::IsType;
-    use frame_support::pallet_prelude::OptionQuery;
-    use frame_support::Blake2_128Concat;
     use frame_system::offchain::SendTransactionTypes;
+    use frame_system::pallet_prelude::OriginFor;
     use frame_system::pallet_prelude::*;
-    use sp_std::vec::Vec;
+    use product_registry::ProductId;
+    use sp_std::if_std;
     use sp_std::vec;
+    use sp_std::vec::Vec;
     pub const IDENTIFIER_MAX_LENGTH: usize = 36;
     pub const SHIPMENT_MAX_PRODUCTS: usize = 10;
     pub const LISTENER_ENDPOINT: &str = "http://localhost:3005";
@@ -119,7 +120,12 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::weight(10_000)]
-        pub fn register_shipment(origin:OriginFor<T>, id: ShipmentId, owner: T::AccountId, products: Vec<ProductId>) -> DispatchResultWithPostInfo {
+        pub fn register_shipment(
+            origin: OriginFor<T>,
+            id: ShipmentId,
+            owner: T::AccountId,
+            products: Vec<ProductId>,
+        ) -> DispatchResultWithPostInfo {
             T::CreateRoleOrigin::ensure_origin(origin.clone())?;
             let who = ensure_signed(origin)?;
 
@@ -167,15 +173,14 @@ pub mod pallet {
             Ok(().into())
         }
 
-
-        #[pallet::weight (10_000)]
+        #[pallet::weight(10_000)]
         pub fn track_shipment(
-            origin:OriginFor<T>,
+            origin: OriginFor<T>,
             id: ShipmentId,
             operation: ShippingOperation,
-           timestamp: T::Moment,
+            timestamp: T::Moment,
             location: Option<ReadPoint>,
-            readings: Option<Vec<Reading<T::Moment>>>
+            readings: Option<Vec<Reading<T::Moment>>>,
         ) -> DispatchResultWithPostInfo {
             T::CreateRoleOrigin::ensure_origin(origin.clone())?;
             let who = ensure_signed(origin)?;
@@ -187,11 +192,12 @@ pub mod pallet {
             let mut shipment = match <Shipments<T>>::get(&id) {
                 Some(shipment) => match shipment.status {
                     ShipmentStatus::Delivered => Err(<Error<T>>::ShipmentHasBeenDelivered),
-                    ShipmentStatus::InTransit if operation == ShippingOperation::Pickup =>
-                        Err(<Error<T>>::ShipmentIsInTransit),
-                    _ => Ok(shipment)
-                }
-                None => Err(<Error<T>>::ShipmentIsUnknown)
+                    ShipmentStatus::InTransit if operation == ShippingOperation::Pickup => {
+                        Err(<Error<T>>::ShipmentIsInTransit)
+                    }
+                    _ => Ok(shipment),
+                },
+                None => Err(<Error<T>>::ShipmentIsUnknown),
             }?;
 
             // Update shipment status
@@ -217,14 +223,21 @@ pub mod pallet {
             let event_idx = Self::store_event(event)?;
             // Update offchain notifications (1 DB write)
             <OcwNotifications<T>>::append(<frame_system::Pallet<T>>::block_number(), event_idx);
-
+            if_std! {
+                println!("1");
+            }
             if operation != ShippingOperation::Scan {
                 // Update shipment (1 DB write)
                 <Shipments<T>>::insert(&id, shipment);
+                if_std! {
+                    println!("2");
+                }
                 // Raise events
                 Self::deposit_event(Event::ShipmentStatusUpdated(who, id, event_idx, status));
             }
-
+            if_std! {
+                println!("3");
+            }
             Ok(().into())
         }
 
@@ -240,7 +253,6 @@ pub mod pallet {
         //         Err(_err) => { debug::info!("[product_tracking_ocw] lock is already acquired"); }
         //     };
         // }
-
     }
 
     #[allow(dead_code)]
@@ -353,7 +365,6 @@ pub mod pallet {
         }
 
         fn notify_listener(ev: &ShippingEvent<T::Moment>) -> Result<(), &'static str> {
-     
             let request =
                 sp_runtime::offchain::http::Request::post(&LISTENER_ENDPOINT, vec![ev.to_string()]);
 
