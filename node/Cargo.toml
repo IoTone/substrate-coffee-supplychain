@@ -5,12 +5,12 @@ description = 'A fresh FRAME-based Substrate node, ready for hacking.'
 edition = '2018'
 homepage = 'https://substrate.dev'
 license = 'Unlicense'
-name = 'node-template'
+name = 'enterprise-sample'
 repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
 version = '3.0.0'
 
 [[bin]]
-name = 'node-template'
+name = 'enterprise-sample'
 
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
@@ -54,8 +54,8 @@ sp-timestamp ={  git= 'https://github.com/paritytech/substrate.git', tag = 'mont
 frame-benchmarking-cli = {  git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'}
 
 # local dependencies
-node-template-runtime = { path = '../runtime', version = '3.0.0' }
+enterprise-sample-runtime = { path = '../runtime', version = '3.0.0' }
 
 [features]
 default = []
-runtime-benchmarks = ['node-template-runtime/runtime-benchmarks']
+runtime-benchmarks = ['enterprise-sample-runtime/runtime-benchmarks']
