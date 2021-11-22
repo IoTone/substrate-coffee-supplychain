@@ -1,5 +1,5 @@
-use node_template_runtime::TechnicalCommitteeConfig;
-use node_template_runtime::{
+use enterprise_sample_runtime::TechnicalCommitteeConfig;
+use enterprise_sample_runtime::{
     opaque::SessionKeys, AccountId, AuraConfig, BalancesConfig, CouncilConfig, GenesisConfig,
     GrandpaConfig, Permission, RbacConfig, RegistrarConfig, Role, Signature, SudoConfig,
     SystemConfig, ValidatorSetConfig, WASM_BINARY,
@@ -11,7 +11,7 @@ use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
-use node_template_runtime::SessionConfig;
+use enterprise_sample_runtime::SessionConfig;
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
