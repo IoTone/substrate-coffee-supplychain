@@ -48,13 +48,14 @@ sp-session = { default-features = false, git= 'https://github.com/paritytech/sub
 sp-std = { default-features = false, git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'  }
 sp-transaction-pool = { default-features = false, git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'  }
 sp-version = { default-features = false, git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'  }
+pallet-did = { default-features = false, git= 'https://github.com/Damfortx8/pallet-did',branch='master',    version = '3.0.0'  }
+rbac = { default-features = false, git= 'https://github.com/Damfortx8/substrate-rbac',branch='master', package = 'substrate-rbac',   version = '0.1.0'  }
 # local dependencies
 product-registry = { default-features = false,package = 'pallet-product-registry',path = '../pallets/product-registry', version = '3.0.0' }
 product-tracking = { default-features = false,package = 'pallet-product-tracking',path = '../pallets/product-tracking', version = '3.0.0' }
-pallet-did = { default-features = false, path = '../pallets/did', version = '3.0.0' }
 registrar = { default-features = false,package = 'pallet-registrar', path = '../pallets/registrar', version = '3.0.0' }
 
-rbac = { default-features = false,package = 'substrate-rbac', path = '../pallets/rbac', version = '0.1.0' }
+ 
 
 [dependencies.validatorset]
 default-features = false

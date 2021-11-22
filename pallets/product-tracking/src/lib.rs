@@ -223,21 +223,15 @@ pub mod pallet {
             let event_idx = Self::store_event(event)?;
             // Update offchain notifications (1 DB write)
             <OcwNotifications<T>>::append(<frame_system::Pallet<T>>::block_number(), event_idx);
-            if_std! {
-                println!("1");
-            }
+          
             if operation != ShippingOperation::Scan {
                 // Update shipment (1 DB write)
                 <Shipments<T>>::insert(&id, shipment);
-                if_std! {
-                    println!("2");
-                }
+                
                 // Raise events
                 Self::deposit_event(Event::ShipmentStatusUpdated(who, id, event_idx, status));
             }
-            if_std! {
-                println!("3");
-            }
+            
             Ok(().into())
         }
 

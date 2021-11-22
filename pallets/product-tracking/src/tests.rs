@@ -463,7 +463,7 @@ fn track_shipment_delivery() {
      
       //  Events are raised
         assert!(System::events().iter().any(|er| {
-            println!("{:?}", er.event);
+            
             er.event
             == Event::ProductTracking(RawEvent::ShipmentStatusUpdated(
                 owner,

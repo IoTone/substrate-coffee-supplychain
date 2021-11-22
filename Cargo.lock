@@ -3941,8 +3941,8 @@ dependencies = [
 [[package]]
 name = "pallet-did"
 version = "3.0.0"
+source = "git+https://github.com/Damfortx8/pallet-did?branch=master#f0fc8dc94b014f28c19eded1cb78f28ab62971a7"
 dependencies = [
- "frame-benchmarking",
  "frame-support",
  "frame-system",
  "pallet-timestamp",
@@ -7438,6 +7438,7 @@ dependencies = [
 [[package]]
 name = "substrate-rbac"
 version = "0.1.0"
+source = "git+https://github.com/Damfortx8/substrate-rbac?branch=master#1289a5283d6d72c18abeef5c079ae52eeabc66af"
 dependencies = [
  "frame-benchmarking",
  "frame-support",

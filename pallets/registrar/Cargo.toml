@@ -18,7 +18,8 @@ frame-system = { default-features = false, git= 'https://github.com/paritytech/s
 frame-support = { default-features = false,  git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'}
 frame-benchmarking = { default-features = false, optional = true,git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.1.0' }
 sp-std = { default-features = false, git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'  }
-pallet-did = { default-features = false, path = '../did',  version = '3.0.0'  }
+pallet-did = { default-features = false, git= 'https://github.com/Damfortx8/pallet-did',branch='master',   version = '3.0.0'  }
+ 
 serde = { version = "1.0.119" }
 [dev-dependencies]
 sp-core = { default-features = false,   git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'  }

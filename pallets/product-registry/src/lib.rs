@@ -38,25 +38,25 @@ pub mod pallet {
         // The product ID would typically be a GS1 GTIN (Global Trade Item Number),
         // or ASIN (Amazon Standard Identification Number), or similar,
         // a numeric or alpha-numeric code with a well-defined data structure.
-        id: ProductId,
+        pub id: ProductId,
         // This is account that represents the owner of this product, as in
         // the manufacturer or supplier providing this product within the value chain.
-        owner: AccountId,
+        pub owner: AccountId,
         // This a series of properties describing the product.
         // Typically, there would at least be a textual description, and SKU.
         // It could also contain instance / lot master data e.g. expiration, weight, harvest date.
-        props: Option<Vec<ProductProperty>>,
+        pub props: Option<Vec<ProductProperty>>,
         // Timestamp (approximate) at which the prodct was registered on-chain.
-        registered: Moment,
+        pub registered: Moment,
     }
 
     // Contains a name-value pair for a product property e.g. description: Ingredient ABC
     #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
     pub struct ProductProperty {
         // Name of the product property e.g. desc or description
-        name: PropName,
+        pub name: PropName,
         // Value of the product property e.g. Ingredient ABC
-        value: PropValue,
+        pub value: PropValue,
     }
 
     impl ProductProperty {
@@ -100,7 +100,8 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn owner_of)]
-    pub type OwnerOf<T: Config> = StorageMap<_, Blake2_128Concat, ProductId, T::AccountId, OptionQuery>;
+    pub type OwnerOf<T: Config> =
+        StorageMap<_, Blake2_128Concat, ProductId, T::AccountId, OptionQuery>;
 
     // Pallets use events to inform users when important changes are made.
     // https://substrate.dev/docs/en/knowledgebase/runtime/events
@@ -130,45 +131,47 @@ pub mod pallet {
     // Dispatchable functions must be annotated with a weight and must return a DispatchResult.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-       
-
         /// An example dispatchable that may throw a custom error.
-        #[pallet::weight(10_000 )] 
-            pub fn register_product(origin:OriginFor<T>, id: ProductId, owner: T::AccountId, props: Option<Vec<ProductProperty>>) -> DispatchResultWithPostInfo {
-                T::CreateRoleOrigin::ensure_origin(origin.clone())?;
-                let who = ensure_signed(origin)?;
-    
-                // Validate product ID
-                Self::validate_product_id(&id)?;
-    
-                // Validate product props
-                Self::validate_product_props(&props)?;
-    
-                // Check product doesn't exist yet (1 DB read)
-                Self::validate_new_product(&id)?;
-    
-                // TODO: if organization has an attribute w/ GS1 Company prefix,
-                //       additional validation could be applied to the product ID
-                //       to ensure its validity (same company prefix as org).
-    
-                // Create a product instance
-                let product = Self::new_product()
-                    .identified_by(id.clone())
-                    .owned_by(owner.clone())
-                    .registered_on(<pallet_timestamp::Pallet<T>>::now())
-                    .with_props(props)
-                    .build();
-    
-                // Add product & ownerOf (3 DB writes)
-                <Products<T>>::insert(&id, product);
-                <ProductsOfOrganization<T>>::append(&owner, &id);
-                <OwnerOf<T>>::insert(&id, &owner);
-    
-                Self::deposit_event(Event::ProductRegistered(who, id, owner));
-    
-                Ok(().into())
-            }
-        
+        #[pallet::weight(10_000)]
+        pub fn register_product(
+            origin: OriginFor<T>,
+            id: ProductId,
+            owner: T::AccountId,
+            props: Option<Vec<ProductProperty>>,
+        ) -> DispatchResultWithPostInfo {
+            T::CreateRoleOrigin::ensure_origin(origin.clone())?;
+            let who = ensure_signed(origin)?;
+
+            // Validate product ID
+            Self::validate_product_id(&id)?;
+
+            // Validate product props
+            Self::validate_product_props(&props)?;
+
+            // Check product doesn't exist yet (1 DB read)
+            Self::validate_new_product(&id)?;
+
+            // TODO: if organization has an attribute w/ GS1 Company prefix,
+            //       additional validation could be applied to the product ID
+            //       to ensure its validity (same company prefix as org).
+
+            // Create a product instance
+            let product = Self::new_product()
+                .identified_by(id.clone())
+                .owned_by(owner.clone())
+                .registered_on(<pallet_timestamp::Pallet<T>>::now())
+                .with_props(props)
+                .build();
+
+            // Add product & ownerOf (3 DB writes)
+            <Products<T>>::insert(&id, product);
+            <ProductsOfOrganization<T>>::append(&owner, &id);
+            <OwnerOf<T>>::insert(&id, &owner);
+
+            Self::deposit_event(Event::ProductRegistered(who, id, owner));
+
+            Ok(().into())
+        }
     }
 
     #[allow(dead_code)]

@@ -191,9 +191,7 @@ pub mod pallet {
     impl<T: Config> EnsureOrigin<T::Origin> for EnsureOrg<T> {
         type Success = T::AccountId;
         fn try_origin(o: T::Origin) -> Result<Self::Success, T::Origin> {
-            if_std! {
-                println!("inside custom origin");
-            }
+             
              o.into().and_then(|o| match o {
                 RawOrigin::Signed(ref who) if <Pallet<T>>::part_of_organization(&who) => {
                     Ok(who.clone())

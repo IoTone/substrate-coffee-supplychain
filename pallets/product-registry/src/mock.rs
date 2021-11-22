@@ -23,8 +23,8 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-        ProductRegistry: product_registry::{Pallet, Call, Storage, Event<T>},
         Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
+        ProductRegistry: product_registry::{Pallet, Call, Storage, Event<T>},
 
     }
 );
@@ -45,7 +45,7 @@ impl system::Config for Test {
     type BlockNumber = u64;
     type Hash = H256;
     type Hashing = BlakeTwo256;
-    type AccountId = u64;
+    type AccountId = sr25519::Public;
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
     type Event = Event;
@@ -85,7 +85,6 @@ impl<T: Config> EnsureOrigin<T::Origin> for MockOrigin<T> {
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-
 pub fn account_key(s: &str) -> sr25519::Public {
     sr25519::Pair::from_string(&format!("//{}", s), None)
         .expect("static values are valid; qed")
@@ -95,8 +94,13 @@ pub fn account_key(s: &str) -> sr25519::Public {
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    system::GenesisConfig::default()
+    let storage = frame_system::GenesisConfig::default()
         .build_storage::<Test>()
-        .unwrap()
-        .into()
+        .unwrap();
+
+    let mut ext = sp_io::TestExternalities::from(storage);
+    // Events are not emitted on block 0 -> advance to block 1.
+    // Any dispatchable calls made during genesis block will have no events emitted.
+    ext.execute_with(|| System::set_block_number(1));
+    ext
 }

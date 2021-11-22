@@ -92,9 +92,6 @@ pub fn development_config() -> Result<ChainSpec, String> {
                 vec![(
                     get_account_id_from_seed::<sr25519::Public>("Alice"),
                     b"Supply Chain Consortium".to_vec(),
-                ),(
-                    get_account_id_from_seed::<sr25519::Public>("Bob"),
-                    b"Org 1".to_vec(),
                 ) ],
                 // organization members
                 vec![],
