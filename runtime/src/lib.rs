@@ -4,17 +4,15 @@
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
-include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
-use sp_consensus_aura::SlotDuration;
-use sp_std::prelude::*;
-use frame_support::traits::Time;
+include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs")); 
+use sp_std::prelude::*; 
 use pallet_grandpa::fg_primitives; 
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList}; 
 use sp_api::impl_runtime_apis; 
 use sp_consensus_aura::sr25519::AuthorityId as AuraId; 
 use sp_core::{
     crypto::KeyTypeId,
-    u32_trait::{_1, _2,_3, _4, _5},
+    u32_trait::{_1, _2,_3, _4,  },
     OpaqueMetadata,
 }; 
 use frame_system::{
@@ -22,7 +20,7 @@ use frame_system::{
 };
 pub use rbac::{Role, Permission};
 use sp_runtime::traits::{
-    BlakeTwo256, Block as BlockT, Convert, IdentifyAccount, IdentityLookup, NumberFor, OpaqueKeys,AccountIdLookup,
+    BlakeTwo256, Block as BlockT, Convert, IdentifyAccount,  NumberFor, OpaqueKeys,AccountIdLookup,
     Saturating, Verify,
 };
  
@@ -303,7 +301,7 @@ where
 	R::Balance: Into<u128>,
 {
 	fn factor() -> u128 {
-		let issuance: u128 = <pallet_balances::Module<R>>::total_issuance().into();
+		let issuance: u128 = <pallet_balances::Pallet<R>>::total_issuance().into();
 		(issuance / u64::max_value() as u128).max(1)
 	}
 }
@@ -577,7 +575,7 @@ pub type Executive = frame_executive::Executive<
     Block,
     frame_system::ChainContext<Runtime>,
     Runtime,
-    AllModules,
+    AllPallets,
 >;
 
 impl_runtime_apis! {
