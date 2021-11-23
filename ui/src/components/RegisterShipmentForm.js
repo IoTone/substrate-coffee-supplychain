@@ -79,9 +79,8 @@ function RegisterShipmentFormComponent (props) {
             name='owner'
             label='Owner'
             state='owner'
-            value={state.owner}
-            required
-            onChange={handleChange}
+            value={ accountPair ? accountPair.address : null}
+            required 
           />
           <Form.Dropdown
             placeholder='Select a product'
