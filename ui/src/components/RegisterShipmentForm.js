@@ -1,4 +1,4 @@
-import { hexToString, u8aToString } from '@polkadot/util';
+import { hexToString } from '@polkadot/util';
 import React, { useEffect, useState } from 'react';
 import { Card, Form } from 'semantic-ui-react';
 import { useSubstrate } from '../substrate-lib';
@@ -13,7 +13,7 @@ function RegisterShipmentFormComponent (props) {
   const [products, setProducts] = useState([]);
   const [state, setState] = useState({
     shipmentId: '',
-    owner: organization,
+    owner:  accountPair.address,
     productId1: '',
     productId2: ''
   });
@@ -53,7 +53,7 @@ function RegisterShipmentFormComponent (props) {
       const nonce = await api.query.palletDid.attributeNonce([organization, 'Org']);
       const attrHash = api.registry.createType('(AccountId, Text, u64)', [organization, 'Org', nonce.subn(1)]).hash;
       const orgAttr = await api.query.palletDid.attributeOf([organization, attrHash]); 
-      setState(state => ({ ...state, owner: u8aToString(orgAttr.value) }));
+      setState(state => ({ ...state}));
     }
 
     setOwner();
