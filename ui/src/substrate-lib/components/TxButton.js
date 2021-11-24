@@ -5,7 +5,6 @@ import { Button } from 'semantic-ui-react';
 import { useSubstrate } from '../';
 import utils from '../utils';
 
-
 function TxButton ({
   accountPair = null,
   label,

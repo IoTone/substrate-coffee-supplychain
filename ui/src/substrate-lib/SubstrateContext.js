@@ -7,8 +7,6 @@ import queryString from 'query-string';
 import React, { useContext, useReducer } from 'react';
 import config from '../config';
 
-
-
 const parsedQuery = queryString.parse(window.location.search);
 const connectedSocket = parsedQuery.rpc || config.PROVIDER_SOCKET;
 console.log(`Connected socket: ${connectedSocket}`);
@@ -25,7 +23,7 @@ const INIT_STATE = {
   api: null,
   apiError: null,
   apiState: null
-}; 
+};
 ///
 // Reducer function for `useReducer`
 

@@ -4,7 +4,6 @@ import { Card, Form } from 'semantic-ui-react';
 import { useSubstrate } from '../substrate-lib';
 import { TxButton } from '../substrate-lib/components';
 
-
 function RegisterShipmentFormComponent (props) {
   const { api } = useSubstrate();
   const { accountPair, organization } = props;
@@ -13,7 +12,7 @@ function RegisterShipmentFormComponent (props) {
   const [products, setProducts] = useState([]);
   const [state, setState] = useState({
     shipmentId: '',
-    owner:  accountPair.address,
+    owner: accountPair.address,
     productId1: '',
     productId2: ''
   });
@@ -52,8 +51,8 @@ function RegisterShipmentFormComponent (props) {
 
       const nonce = await api.query.palletDid.attributeNonce([organization, 'Org']);
       const attrHash = api.registry.createType('(AccountId, Text, u64)', [organization, 'Org', nonce.subn(1)]).hash;
-      const orgAttr = await api.query.palletDid.attributeOf([organization, attrHash]); 
-      setState(state => ({ ...state}));
+      const orgAttr = await api.query.palletDid.attributeOf([organization, attrHash]);
+      setState(state => ({ ...state }));
     }
 
     setOwner();
@@ -80,7 +79,7 @@ function RegisterShipmentFormComponent (props) {
             label='Owner'
             state='owner'
             value={ accountPair ? accountPair.address : null}
-            required 
+            required
           />
           <Form.Dropdown
             placeholder='Select a product'

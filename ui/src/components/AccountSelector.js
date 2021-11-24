@@ -126,12 +126,14 @@ function BalanceAnnotation (props) {
     return () => unsubscribe && unsubscribe();
   }, [api, accountSelected]);
 
-  return accountSelected ? (
+  return accountSelected
+    ? (
     <Label pointing='left'>
       <Icon name='money' color='green' />
       {accountBalance}
     </Label>
-  ) : null;
+      )
+    : null;
 }
 
 export default function AccountSelector (props) {

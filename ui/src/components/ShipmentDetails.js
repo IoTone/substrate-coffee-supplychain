@@ -140,7 +140,8 @@ function ShipmentDetailsComponent (props) {
               <Grid.Column>
                 <Header as="h4" floated="left">Delivered:</Header>
                 <span>{ shipment.delivered.value.toString().length > 0
-                  ? new Date(shipment.delivered.value.toNumber()).toLocaleString() : ''
+                  ? new Date(shipment.delivered.value.toNumber()).toLocaleString()
+                  : ''
                 }</span>
               </Grid.Column>
             </Grid.Row>
@@ -159,7 +160,8 @@ function ShipmentDetailsComponent (props) {
                       : eventType === 'ShipmentPickup'
                         ? 'truck'
                         : eventType === 'ShipmentScan'
-                          ? 'barcode' : 'home'
+                          ? 'barcode'
+                          : 'home'
                     } />
                     <Step.Content>
                       <Step.Title>{event.event_type.toString().substring(8)}</Step.Title>
@@ -187,7 +189,8 @@ function ShipmentDetailsComponent (props) {
             <ShipmentOperations accountPair={accountPair} shipment={shipment} />
           </Grid.Column>
         </Grid>
-      </Container> : <div></div>
+      </Container>
+      : <div></div>
   );
 }
 

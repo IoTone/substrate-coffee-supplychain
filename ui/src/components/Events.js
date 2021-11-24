@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Button, Card, Feed } from 'semantic-ui-react';
 import { useSubstrate } from '../substrate-lib';
 
-
 // Events to be filtered from feed
 const FILTERED_EVENTS = [
   'system:ExtrinsicSuccess:: (phase={"ApplyExtrinsic":0})',
@@ -34,11 +33,11 @@ function Main (props) {
           const params = event.data.map(
             (data, index) => `${types[index].type}: ${data.toString()}`
           );
-console.log({event});
+          console.log({ event });
           setEventFeed(e => [{
             icon: 'bell',
             summary: `${eventName}-${e.length}`,
-            extraText: event&&event.meta&&event.meta.documentation?event.meta.documentation.join(', ').toString():"",
+            extraText: event && event.meta && event.meta.documentation ? event.meta.documentation.join(', ').toString() : '',
             content: params.join(', ')
           }, ...e]);
         });
@@ -73,7 +72,9 @@ console.log({event});
 
 export default function Events (props) {
   const { api } = useSubstrate();
-  return api.query && api.query.system && api.query.system.events ? (
+  return api.query && api.query.system && api.query.system.events
+    ? (
     <Main {...props} />
-  ) : null;
+      )
+    : null;
 }

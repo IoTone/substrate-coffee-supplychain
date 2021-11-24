@@ -60,7 +60,9 @@ export default function BlockNumber (props) {
   return api.derive &&
     api.derive.chain &&
     api.derive.chain.bestNumber &&
-    api.derive.chain.bestNumberFinalized ? (
+    api.derive.chain.bestNumberFinalized
+    ? (
       <Main {...props} />
-    ) : null;
+      )
+    : null;
 }

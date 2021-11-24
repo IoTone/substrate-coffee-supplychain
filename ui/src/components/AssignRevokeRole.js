@@ -4,7 +4,6 @@ import { Card, Form } from 'semantic-ui-react';
 import { useSubstrate } from '../substrate-lib';
 import { TxButton } from '../substrate-lib/components';
 
-
 export default function Main (props) {
   const { api } = useSubstrate();
   const { accountPair } = props;
@@ -18,14 +17,11 @@ export default function Main (props) {
     let unsub = null;
 
     const getRoles = async () => {
-  
-
       unsub = await api.query.rbac.roles(rawRoles => {
         const roles = rawRoles
-        
+
           .map(r => r.toJSON())
           .map(r => ({ ...r, pallet: hexToString(r.pallet) }));
-           
 
         setRoles(roles);
       });
