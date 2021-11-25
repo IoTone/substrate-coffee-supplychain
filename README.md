@@ -1,5 +1,7 @@
 # Substrate & FRAME Supply Chain Sample
 
+** Forked from https://github.com/IoTone/substrate-enterprise-sample-v3 **
+
 ## *Status:  *
  
 > Please use this project as an example to learn from, not to use as a basis for starting a
