@@ -24,7 +24,8 @@ jobs:
 
       - name: Set-Up
         run: sudo apt install -y cmake pkg-config libssl-dev git build-essential clang libclang-dev curl
-
+      - name: Open Chain folder
+        run : pwd
       - name: Install Rustup
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -36,9 +37,9 @@ jobs:
 
       - name: Check Build
         run: |
-          SKIP_WASM_BUILD=1 cargo check --release
+         cd chain && SKIP_WASM_BUILD=1 cargo check --release
 
       - name: Check Build for Benchmarking
         run: >
-          pushd node &&
+          cd chain && pushd node &&
           cargo check --features=runtime-benchmarks --release
