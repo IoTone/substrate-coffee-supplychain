@@ -51,9 +51,11 @@ sp-version = { default-features = false, git= 'https://github.com/paritytech/sub
 pallet-did = { default-features = false, git= 'https://github.com/Damfortx8/pallet-did',branch='master',    version = '3.0.0'  }
 rbac = { default-features = false, git= 'https://github.com/Damfortx8/substrate-rbac',branch='master', package = 'substrate-rbac',   version = '0.1.0'  }
 # local dependencies
-product-registry = { default-features = false,package = 'pallet-product-registry',path = '../pallets/product-registry', version = '3.0.0' }
-product-tracking = { default-features = false,package = 'pallet-product-tracking',path = '../pallets/product-tracking', version = '3.0.0' }
+coffe-products = { default-features = false,package = 'pallet-coffe-products',path = '../pallets/coffe-products', version = '3.0.0' }
+raw-materials = { default-features = false,package = 'pallet-raw-materials',path = '../pallets/raw-materials', version = '3.0.0' }
+supply-chain = { default-features = false,package = 'pallet-supply-chain',path = '../pallets/supply-chain', version = '3.0.0' }
 registrar = { default-features = false,package = 'pallet-registrar', path = '../pallets/registrar', version = '3.0.0' }
+retail-transaction = { default-features = false,package = 'pallet-retail-transaction', path = '../pallets/retail-transaction', version = '3.0.0' }
 
  
 
@@ -121,10 +123,12 @@ std = [
     'sp-std/std',
     'sp-transaction-pool/std',
     'sp-version/std',
-	'pallet-did/std',
-	'product-registry/std',
-	'product-tracking/std',
+	'pallet-did/std', 
 	'validatorset/std',
 	'rbac/std',
-	'registrar/std'
+	'registrar/std',
+    'retail-transaction/std',
+    'coffe-products/std',
+    'raw-materials/std', 
+    'supply-chain/std',
 ]

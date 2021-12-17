@@ -476,20 +476,27 @@ impl rbac::Config for Runtime {
 	type RbacAdminOrigin = registrar::EnsureOrg<Runtime>;
 
 }
-
+impl retail_transaction::Config for Runtime{
+    type Event = Event;
+}
 impl validatorset::Config for Runtime {
     type Event = Event;
 	type AddRemoveOrigin = EnsureRoot<AccountId>;
 }
-impl product_registry::Config for Runtime {
+impl coffe_products::Config for Runtime {
+    type Event = Event;
+    type CreateRoleOrigin = registrar::EnsureOrg<Runtime>;
+}
+impl raw_materials::Config for Runtime {
+    type Event = Event;
+    type CreateRoleOrigin = registrar::EnsureOrg<Runtime>;
+}
+impl supply_chain::Config for Runtime {
     type Event = Event;
     type CreateRoleOrigin = registrar::EnsureOrg<Runtime>;
 }
 
-impl product_tracking::Config for Runtime {
-    type Event = Event;
-    type CreateRoleOrigin = registrar::EnsureOrg<Runtime>;
-}
+ 
 impl pallet_randomness_collective_flip::Config for Runtime {}
 impl pallet_session::Config for Runtime {
     type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
@@ -537,9 +544,11 @@ construct_runtime!(
         // Include the custom logic from the pallet-template in the runtime.
 
         Registrar: registrar::{Pallet, Call, Storage, Event<T>, Config<T>},
-        ProductRegistry: product_registry::{Pallet, Call, Storage, Event<T>},
-        ProductTracking: product_tracking::{Pallet, Call, Storage, Event<T>},
+        RawMaterials: raw_materials::{Pallet, Call, Storage, Event<T>}, 
+        SupplyChain: supply_chain::{Pallet, Call, Storage, Event<T>}, 
+        CoffeProducts: coffe_products::{Pallet, Call, Storage, Event<T>}, 
         PalletDid: pallet_did::{Pallet, Call, Storage, Event<T>}, 
+        RetailTransaction:retail_transaction::{Pallet,Call,Storage,Event<T>},
         Rbac: rbac::{Pallet, Call, Storage, Event<T>, Config<T>},
     }
 );

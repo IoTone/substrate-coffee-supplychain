@@ -1374,18 +1374,20 @@ dependencies = [
  "hex-literal",
  "pallet-aura",
  "pallet-balances",
+ "pallet-coffe-products",
  "pallet-collective",
  "pallet-democracy",
  "pallet-did",
  "pallet-elections-phragmen",
  "pallet-grandpa",
- "pallet-product-registry",
- "pallet-product-tracking",
  "pallet-randomness-collective-flip",
+ "pallet-raw-materials",
  "pallet-registrar",
+ "pallet-retail-transaction",
  "pallet-scheduler",
  "pallet-session",
  "pallet-sudo",
+ "pallet-supply-chain",
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
@@ -3909,6 +3911,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-coffe-products"
+version = "3.0.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-fixed",
+]
+
+[[package]]
 name = "pallet-collective"
 version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate.git?tag=monthly-2021-07#83808aa815a9fbc528b76cd25ae1dec57e269771"
@@ -3993,40 +4011,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-product-registry"
-version = "3.0.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "pallet-timestamp",
- "parity-scale-codec",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "pallet-product-tracking"
-version = "3.0.0"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "hex",
- "pallet-product-registry",
- "pallet-timestamp",
- "parity-scale-codec",
- "serde",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "substrate-fixed",
-]
-
-[[package]]
 name = "pallet-randomness-collective-flip"
 version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate.git?tag=monthly-2021-07#83808aa815a9fbc528b76cd25ae1dec57e269771"
@@ -4037,6 +4021,22 @@ dependencies = [
  "safe-mix",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "pallet-raw-materials"
+version = "3.0.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-fixed",
 ]
 
 [[package]]
@@ -4053,6 +4053,26 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "pallet-retail-transaction"
+version = "3.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "pallet-coffe-products",
+ "pallet-did",
+ "pallet-supply-chain",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-fixed",
 ]
 
 [[package]]
@@ -4101,6 +4121,25 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "pallet-supply-chain"
+version = "3.0.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "pallet-raw-materials",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-fixed",
 ]
 
 [[package]]

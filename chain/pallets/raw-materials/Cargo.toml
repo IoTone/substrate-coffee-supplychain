@@ -4,7 +4,7 @@ description = 'FRAME pallet template for defining custom runtime logic.'
 edition = '2018'
 homepage = 'https://substrate.dev'
 license = 'Unlicense'
-name = 'pallet-product-registry'
+name = 'pallet-raw-materials'
 readme = 'README.md'
 repository = 'https://github.com/substrate-developer-hub/substrate-node-template/'
 version = '3.0.0'
@@ -12,6 +12,14 @@ version = '3.0.0'
 [package.metadata.docs.rs]
 targets = ['x86_64-unknown-linux-gnu']
 
+[dependencies.fixed]
+default-features = false
+git = "https://github.com/encointer/substrate-fixed"
+package = "substrate-fixed"
+tag = "v0.5.7"
+version = "0.5.7"
+
+ 
 [dependencies]
 codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '2.0.0' }
 frame-system = { default-features = false, git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0' }
