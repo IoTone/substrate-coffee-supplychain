@@ -198,10 +198,14 @@ function TxButton ({
 
     return paramFields.every((paramField, ind) => {
       const param = inputParams[ind];
-      if (paramField.optional) { return true; }
-      if (param == null) { return false; }
+       if (paramField.optional) {
+         return true; }
+       if (param == null) { 
+  
+        return false; }
 
       const value = typeof param === 'object' ? param.value : param;
+ 
       return value !== null && value !== '';
     });
   };
@@ -210,8 +214,7 @@ function TxButton ({
     if (!sudoKey || !acctPair) { return false; }
     return acctPair.address === sudoKey;
   };
-
-  return (
+   return (
     <Button
       basic
       color={color}

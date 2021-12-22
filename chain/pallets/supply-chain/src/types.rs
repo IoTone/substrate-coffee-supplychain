@@ -36,7 +36,7 @@ pub enum ProcessType {
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
 pub struct SupplyProcess<Moment> {
     pub id: SupplyProcessId,
-    pub attribute: Attribute,
+    pub attribute: ProcessAttribute,
     pub certifications: Certifications,
     pub date: Moment,
     pub amount: Amount,
@@ -46,7 +46,7 @@ pub struct SupplyProcess<Moment> {
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
-pub struct Attribute {
+pub struct ProcessAttribute {
     pub name: AttributeName,
     pub value: AttributeValue,
 }
@@ -54,7 +54,7 @@ pub struct Attribute {
 impl<Moment> SupplyProcess<Moment> {
     pub fn new(
         id:SupplyProcessId,
-        attribute: Attribute,
+        attribute: ProcessAttribute,
         certifications: Certifications,
         date: Moment,
         amount: Amount,

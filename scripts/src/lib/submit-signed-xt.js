@@ -14,6 +14,7 @@ export default function (api, txn, sender) {
         if (dispatchError) {
           if (!dispatchError.isModule) throw `${dispatchError}`;
           const decoded = api.registry.findMetaError(dispatchError.asModule);
+          console.log(decoded)
           throw decoded.documentation.join(' ');
         }
 

@@ -5,8 +5,7 @@ use frame_support::{sp_runtime::RuntimeDebug, sp_std::prelude::*};
 // Custom types
 pub type Identifier = Vec<u8>;
 pub type Quantity = I16F16;
-pub type Certifications = Vec<Vec<u8>>;
-pub type HarverstId = Identifier;
+pub type Certifications = Vec<Vec<u8>>; 
 pub type ProductId = Identifier;
 pub type Decimal = I16F16;
 pub type Amount = Decimal;

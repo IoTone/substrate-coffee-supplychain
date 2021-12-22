@@ -29,15 +29,27 @@ export default function Main (props) {
     async function organizations (addr) {
       unsub1 = await api.query.registrar.organizations(async rawData => {
         const strData = rawData.map(r => r.toString());
-
-        if (strData.includes(addr)) {
+         if (strData.includes(addr)) {
           // Current account is an org
+      
+
           const nonce = await api.query.palletDid.attributeNonce([addr, 'Org']);
           const attrHash = api.registry.createType('(AccountId, Text, u64)', [addr, 'Org', nonce.subn(1)]).hash;
-          const orgAttr = await api.query.palletDid.attributeOf([addr, attrHash]);
-          setOrganizations([{ value: addr, text: u8aToString(orgAttr.value) }]);
+        try {
+            const orgAttr = await api.query.palletDid.attributeOf([addr, attrHash]);
+       
+           
+          //const strDataw = res.map(r => r.toString());
+        
+           setOrganizations([{ value: addr, text: u8aToString(orgAttr.value) }]);
           setSelectedOrganization(addr);
           setSelected(addr);
+        } catch (error) {
+          console.log("eooe",error);
+        }
+         
+      
+ 
         } else {
           membersOf(addr);
         }

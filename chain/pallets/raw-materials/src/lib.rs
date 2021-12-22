@@ -106,22 +106,53 @@ pub mod pallet {
     #[allow(dead_code)]
     impl<T: Config> Pallet<T> {
         pub fn verify_amount(amount: Amount) -> Result<(), Error<T>> {
+            sp_std::if_std! {
+                // This code is only being compiled and executed when the `std` feature is enabled.
+                println!("verify amount,{:?}",amount);
+            }
             ensure!(amount > 0, Error::<T>::InvalidAmount);
             Ok(())
         }
 
         pub fn update_remaining_amount(amount: Amount, id: RawMaterialId) -> Result<(), Error<T>> {
+            sp_std::if_std! {
+                // This code is only being compiled and executed when the `std` feature is enabled.
+                println!("updating");
+            }
             Self::verify_amount(amount.clone())?;
+            sp_std::if_std! {
+                // This code is only being compiled and executed when the `std` feature is enabled.
+                println!("updating...1");
+            }
             let raw_material = <RawMaterials<T>>::get(&id);
-            ensure!(!raw_material.is_some(), Error::<T>::RawMaterialIdMissing);
+            sp_std::if_std! {
+                // This code is only being compiled and executed when the `std` feature is enabled.
+                println!("updating...2 ,{:?}",raw_material);
+            }
+           // ensure!(!raw_material.is_some(), Error::<T>::RawMaterialIdMissing);
+            sp_std::if_std! {
+                // This code is only being compiled and executed when the `std` feature is enabled.
+                println!("updating...3");
+            }
             let mut raw_material = raw_material.unwrap();
+            sp_std::if_std! {
+                // This code is only being compiled and executed when the `std` feature is enabled.
+                println!("updating...4");
+            }
             ensure!(
                 raw_material.remaining_amount - amount >= 0,
                 Error::<T>::RawMaterialIdMissing
             );
-
+            sp_std::if_std! {
+                // This code is only being compiled and executed when the `std` feature is enabled.
+                println!("updating...5");
+            }
             raw_material = raw_material.subtract_amount(amount);
             <RawMaterials<T>>::insert(&id, raw_material);
+            sp_std::if_std! {
+                // This code is only being compiled and executed when the `std` feature is enabled.
+                println!("updated");
+            }
             Ok(())
         }
     }

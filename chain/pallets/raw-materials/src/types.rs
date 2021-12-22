@@ -1,10 +1,7 @@
-use codec::{Decode, Encode};
-use core::fmt;
+use codec::{Decode, Encode}; 
 use fixed::types::I16F16;
 use frame_support::{sp_runtime::RuntimeDebug, sp_std::prelude::*}; 
-pub type Identifier = Vec<u8>;
-pub type Quantity = I16F16;
-pub type Certifications = Vec<Vec<u8>>;
+pub type Identifier = Vec<u8>; 
 pub type RawMaterialId = Identifier;
 pub type OriginProcess = Identifier;
 pub type Decimal = I16F16;

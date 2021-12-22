@@ -101,7 +101,7 @@ pub mod pallet {
         pub fn register_process(
             origin: OriginFor<T>,
             id:SupplyProcessId,
-            attribute: Attribute,
+            attribute: ProcessAttribute,
             certifications: Certifications,
             amount: Amount,
             input_amount: Amount,
@@ -110,6 +110,7 @@ pub mod pallet {
             owner: T::AccountId,
         ) -> DispatchResultWithPostInfo {
             let who = ensure_signed(origin)?;
+          
             <raw_materials::Pallet<T>>::verify_amount(amount)?;
             <raw_materials::Pallet<T>>::verify_amount(input_amount)?;
             <raw_materials::Pallet<T>>::update_remaining_amount(input_amount, raw_material_id.clone())?;
@@ -127,7 +128,10 @@ pub mod pallet {
             <Processes<T>>::insert(&id, process);
             <ProcessesOfOrganization<T>>::append(&owner, &id);
             <ProcessesOfRawMaterial<T>>::append(&raw_material_id, &id);
-
+  sp_std::if_std! {
+                // This code is only being compiled and executed when the `std` feature is enabled.
+                println!("Entro");
+            }
             Ok(().into())
         }
 
