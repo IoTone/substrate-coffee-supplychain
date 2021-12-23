@@ -127,14 +127,23 @@ pub mod pallet {
             let id =process.id.clone();
             <Processes<T>>::insert(&id, process);
             <ProcessesOfOrganization<T>>::append(&owner, &id);
-            <ProcessesOfRawMaterial<T>>::append(&raw_material_id, &id);
-  sp_std::if_std! {
-                // This code is only being compiled and executed when the `std` feature is enabled.
-                println!("Entro");
-            }
+ 
             Ok(().into())
         }
-
+        #[pallet::weight(10_000)]
+        pub fn update_process(
+            origin: OriginFor<T>,
+            id:SupplyProcessId, 
+        ) -> DispatchResultWithPostInfo {
+            let who = ensure_signed(origin)?;
+           let process =<Processes<T>>::get(&id);
+            let mut process = process.unwrap();
+            process.archived=true;
+            <Processes<T>>::insert(&id, process);
+            
+ 
+            Ok(().into())
+        }
       
     }
 

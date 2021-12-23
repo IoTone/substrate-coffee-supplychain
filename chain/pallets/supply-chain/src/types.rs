@@ -10,6 +10,8 @@ pub type AttributeValue = Vec<u8>;
 pub type RawMaterialId = Identifier;
 pub type Amount = Decimal;
 pub type Certifications = Vec<Vec<u8>>;
+ 
+
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
 
@@ -40,6 +42,7 @@ pub struct SupplyProcess<Moment> {
     pub certifications: Certifications,
     pub date: Moment,
     pub amount: Amount,
+    pub archived:bool,
     pub inputAmount: Amount,
     pub processType: ProcessType,
     pub rawMaterialId: RawMaterialId,
@@ -61,6 +64,7 @@ impl<Moment> SupplyProcess<Moment> {
         inputAmount: Amount,
         processType: ProcessType,
         rawMaterialId: RawMaterialId,
+        
     ) -> Self {
      
         Self {
@@ -72,6 +76,7 @@ impl<Moment> SupplyProcess<Moment> {
             inputAmount,
             processType,
             rawMaterialId,
+            archived:false
         }
     }
 }

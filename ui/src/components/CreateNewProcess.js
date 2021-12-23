@@ -39,10 +39,11 @@ export default function Main(props) {
       case processTypes[5].value: return attributeName[5]
     }
   }
+  
   useEffect(() => {
     api.query.rawMaterials.rawMaterialsOfOrganization(organization, async rawMaterialsId => {
       api.query.rawMaterials.rawMaterials.multi(rawMaterialsId, async rawMaterials => {
-        const validRawMaterials = rawMaterials
+        let validRawMaterials = rawMaterials
           .filter(shipment => !shipment.isNone)
           .map(shipment => shipment.unwrap()).filter(p => p.remaining_amount.toNumber() > 0);
         await Promise.all(validRawMaterials.map(async material => {
@@ -53,12 +54,14 @@ export default function Main(props) {
           }
          
         }))
+        
+        validRawMaterials=validRawMaterials.filter(m=>processTypes.findIndex(pt=> pt.value===m.originProcess)<processTypes.findIndex(pt=> pt.value===process))
          const convertedMaterials = validRawMaterials.map(rawMaterial => ({ text: (rawMaterial.state.toString() === "UnRoasted" ? "Unroasted beans " : "Roasted beans ") + ": remaining amount " + rawMaterial.remaining_amount.toNumber() + " lb"+(rawMaterial.originProcess? " from: "+rawMaterial.originProcess:""), value: u8aToString(rawMaterial.id) }))
         setRawMaterials(convertedMaterials)
       });
     });
 
-  }, [organization]);
+  }, [organization,process]);
 
 
   return <Card fluid color='blue'>

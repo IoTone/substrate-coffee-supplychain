@@ -5,7 +5,7 @@
     "Address": "MultiAddress",
     "LookupSource": "MultiAddress",
     "Signature": "Vec<u8>",
-    "Attribute": {
+     "Attribute": {
       "name": "Vec<u8>",
       "value": "Vec<u8>",
       "validity": "BlockNumber",
@@ -108,10 +108,11 @@
       "attribute": "ProcessAttribute",
       "certifications": "Certifications",
       "date": "Moment",
-      "amount": "Amount",
+      "amount": "Amount","archived":"bool",
       "inputAmount": "Amount",
       "processType": "ProcessType",
-      "rawMaterialId": "RawMaterialId"
+      "rawMaterialId": "RawMaterialId" 
+      
     },
     "RawMaterial": {
       "id": "RawMaterialId",

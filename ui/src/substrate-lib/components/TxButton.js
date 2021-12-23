@@ -5,7 +5,8 @@ import { Button } from 'semantic-ui-react';
 import { useSubstrate } from '../';
 import utils from '../utils';
 
-function TxButton ({
+function TxButton ({ 
+  ref=null,
   accountPair = null,
   label,
   setStatus,
@@ -216,6 +217,7 @@ function TxButton ({
   };
    return (
     <Button
+    ref={ref}
       basic
       color={color}
       style={style}
