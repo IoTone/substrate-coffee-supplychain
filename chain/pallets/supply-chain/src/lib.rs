@@ -153,8 +153,8 @@ pub mod pallet {
           let process=  <Processes<T>>::get(&id);
           match process{
               Some(p)=>{
-                 match p.processType {
-                    ProcessType::  Harvesing=>0,
+                 match p.process_type {
+                    ProcessType::  Harvesting=>0,
                     ProcessType::Processing=>0, 
                     ProcessType::Roasting=>1,
                     ProcessType::Grinding=>2,

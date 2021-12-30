@@ -10,6 +10,7 @@ pub type Amount = Decimal;
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
 
 pub enum State {
+    Grinded,
     Roasted,
     UnRoasted,
 }

@@ -1,6 +1,6 @@
 use codec::{Decode, Encode};
 use core::fmt;
-use fixed::types::I16F16;
+use fixed::types::{I16F16, U128F0, U16F0};
 use frame_support::{sp_runtime::RuntimeDebug, sp_std::prelude::*};
 
 // Custom types
@@ -11,15 +11,14 @@ pub type CurrencyType = Vec<u8>;
 pub type Quantity = Decimal;
 pub type SKU = Vec<u8>;
 pub type SerialNumber = Vec<u8>;
-pub type Certifications = Vec<u8>;
+pub type Certifications = Vec<Vec<u8>>;
 pub type Brand = Vec<u8>;
 pub type Cost = Decimal;
-pub type AmountOfProducts = u128;
+pub type AmountOfProducts = Quantity;
 pub type AmountForProducts = Decimal;
 pub type Id = Identifier;
 pub type OriginProcess = Identifier;
-pub type ProductId = Identifier;
-
+  
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
 
 pub struct Sale<AccountId, Moment> {
@@ -30,10 +29,10 @@ pub struct Sale<AccountId, Moment> {
     pub quantity: Quantity,
     pub sku: SKU,
     pub serial_number: SerialNumber,
-    pub product_id: ProductId,
-    pub user: AccountId,
+     pub user: AccountId,
     pub buyer: AccountId,
 }
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
 
 pub struct RetailPackaging<Moment> {
     pub id: Id,
@@ -86,8 +85,7 @@ impl<AccountId, Moment> Sale<AccountId, Moment> {
         quantity: Quantity,
         sku: SKU,
         serial_number: SerialNumber,
-        product_id: ProductId,
-        user: AccountId,
+         user: AccountId,
         buyer: AccountId,
     ) -> Self {
        
@@ -96,8 +94,7 @@ impl<AccountId, Moment> Sale<AccountId, Moment> {
             buyer,
             user,
             date,
-            product_id,
-            cost,
+             cost,
             quantity,
             sku,
             currency_type,

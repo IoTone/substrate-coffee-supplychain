@@ -7,12 +7,15 @@ import { hexToU8a, u8aToString } from '@polkadot/util';
 export default function Main(props) {
   const [status, setStatus] = useState(null);
   const [processes, setProcesses] = useState([]);
-  const [formState, setFormState] = useState({ state: null, originProcess: null, amount: 0.0, organization: null });
+  const [formState, setFormState] = useState({ state: null, originProcess: null, amount: null, organization: null });
   const { accountPair, organization } = props;
   const materialStates = ["Roasted",
-    "UnRoasted"]
+    "UnRoasted", "Grinded"]
   const onChange = (_, data) => {
-    console.log(data);
+    if (data.state === "amount") {
+      if (parseFloat(data.value) <= 0)
+        return
+    }
     setFormState(prev => ({ ...prev, [data.state]: data.value }));
   }
   const { amount, originProcess, state, } = formState;
@@ -28,10 +31,13 @@ export default function Main(props) {
           api.query.rawMaterials.rawMaterials.multi(rawMaterialsId, async rawMaterials => {
             let validRawMaterials = rawMaterials
               .filter(material => !material.isNone).map(m => m.unwrap());
-          
-              validProcesses=validProcesses.filter(vp=>(  !validRawMaterials.find(vrm=>u8aToString(hexToU8a( vrm.origin_process.toString()))=== u8aToString(vp.id))))
+
+            const retailPackagingsIds = await api.query.retailTransaction.retailPackagingsByOrg(organization)
+            const retailPackagings = await api.query.retailTransaction.retailPackagings.multi(retailPackagingsIds)
+            let validateRetailPackagings = retailPackagings
+              .filter(packaging => !packaging.isNone).map(m => m.unwrap());
+            validProcesses = validProcesses.filter(vp => (!validRawMaterials.find(vrm => u8aToString(hexToU8a(vrm.origin_process.toString())) === u8aToString(vp.id)) && !validateRetailPackagings.find(vrm => u8aToString(hexToU8a(vrm.origin_process.toString())) === u8aToString(vp.id))))
             const convertedProcesses = validProcesses.map(p => ({ text: p.processType.toString() + " Amount " + p.amount.toNumber() + " lb", value: u8aToString(p.id), amount: p.amount.toNumber(), type: p.processType.toString() }))
-            convertedProcesses.push({ text: "Null", value: "null", amount: null })
             setProcesses(convertedProcesses)
 
           })
@@ -43,7 +49,21 @@ export default function Main(props) {
 
 
   }, [organization]);
+
+  const getState=()=>{
+    if (materialState)
+    switch (materialState.type) {
+      case "Roasting":
+        return "Roasted"
+      case "Grinding":
+        return "Grinded"
+     
+      default:return "Unroasted"
+     }
+     return "Unroasted"
+  }
   const materialState = processes.find(p => p.value === originProcess)
+  console.log({amount});
   return <Card fluid color='blue'>
     <Card.Content style={{ flexGrow: 0 }} header='Register raw material' />
     <Card.Content>
@@ -52,15 +72,16 @@ export default function Main(props) {
           <Form.Input
             fluid required
             label='Amount (lb)'
-            type='text'
+            type="number"
             state="amount"
             value={amount}
+            
             disabled={originProcess !== null}
             onChange={onChange}
           />
           <Form.Field  >
             <h5>Process</h5>
-            <Form.Dropdown selection fluid
+            <Form.Dropdown selection fluid disabled={processes.length === 0}
               placeholder='Select process'
               options={processes}
               onChange={(_, dropdown) => {
@@ -77,21 +98,22 @@ export default function Main(props) {
             fluid required
             label='State'
             type='select'
-            disabled={true}
-            value={materialState && materialState.type === "Roasting" ? "Roasted" : "Unroasted"}
-            onChange={onChange}
-          />
+             
+            className="disable-input"
+            value={getState()}
+           />
           <Form.Field>
             <TxButton
               accountPair={accountPair}
               label='Submit'
               type='SIGNED-TX'
-              setStatus={setStatus}
+               setStatus={setStatus}
               style={{ display: 'block', margin: 'auto' }}
               attrs={{
+               
                 palletRpc: 'rawMaterials',
                 callable: 'registerRawMaterial',
-                inputParams: [v4(), "UnRoasted", organization, originProcess === "null" ? null : originProcess, amount],
+                inputParams: [v4(), getState(), organization, originProcess === "null" ? null : originProcess, amount],
                 paramFields: [true, true, true, { optional: true }, true]
               }}
             />

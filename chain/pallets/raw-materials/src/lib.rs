@@ -75,7 +75,7 @@ pub mod pallet {
         #[pallet::weight(10_000)]
         pub fn register_raw_material(
             origin: OriginFor<T>,
-            id:RawMaterialId,
+            id: RawMaterialId,
             state: State,
             owner: T::AccountId,
             origin_process: Option<OriginProcess>,
@@ -83,7 +83,7 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             T::CreateRoleOrigin::ensure_origin(origin.clone())?;
             let who = ensure_signed(origin)?;
-
+            Self::verify_amount(amount.clone())?;
             // Create a product instance
             let raw_material = RawMaterial::new(
                 id,
@@ -106,28 +106,25 @@ pub mod pallet {
     #[allow(dead_code)]
     impl<T: Config> Pallet<T> {
         pub fn verify_amount(amount: Amount) -> Result<(), Error<T>> {
-            
             ensure!(amount > 0, Error::<T>::InvalidAmount);
             Ok(())
         }
 
         pub fn update_remaining_amount(amount: Amount, id: RawMaterialId) -> Result<(), Error<T>> {
-             
             Self::verify_amount(amount.clone())?;
-            
+
             let raw_material = <RawMaterials<T>>::get(&id);
-            
-           
+
             let mut raw_material = raw_material.unwrap();
-           
+
             ensure!(
                 raw_material.remaining_amount - amount >= 0,
                 Error::<T>::RawMaterialIdMissing
             );
-             
+
             raw_material = raw_material.subtract_amount(amount);
             <RawMaterials<T>>::insert(&id, raw_material);
-            
+
             Ok(())
         }
     }

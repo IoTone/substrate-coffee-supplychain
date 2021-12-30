@@ -5,7 +5,7 @@
     "Address": "MultiAddress",
     "LookupSource": "MultiAddress",
     "Signature": "Vec<u8>",
-     "Attribute": {
+    "Attribute": {
       "name": "Vec<u8>",
       "value": "Vec<u8>",
       "validity": "BlockNumber",
@@ -23,12 +23,15 @@
     "PropName": "Vec<u8>",
     "PropValue": "Vec<u8>",
     "Product": {
-      "product_id": "ProductId",
-      "kind": "Kind",
-      "SKU": "SKU",
-      "lb": "Decimal",
-      "date": "Moment",
-      "status": "Status"
+      "product_id":"ProductId",
+      "date":"Moment",
+      "kind":"Kind",
+      "sku":"SKU",
+      "lb":"Decimal",
+      "amount":"Decimal",
+      "remaining_amount":"Decimal",
+      "price":"Decimal",
+      "packaging_id":"Identifier"
     },
     "Identifier": "Vec<u8>",
     "Decimal": "i32",
@@ -45,7 +48,7 @@
     "Quantity": "Decimal",
     "Amount": "Decimal",
     "AmountForProducts": "Decimal",
-    "AmountOfProducts": "u128",
+    "AmountOfProducts": "Quantity",
     "RawMaterialId": "Identifier",
     "OriginProcess": "Identifier",
     "SupplyProcessId": "Identifier",
@@ -53,13 +56,13 @@
     "CurrencyType": "Vec<u8>",
     "Brand": "Vec<u8>",
     "Kind": {
-      "_emun": [
-        "Bag",
-        "BagRoasted",
-        "Grinded",
-        "Whole"
+      "_enum": [
+      "Bag",
+      "BagRoasted",
+      "Grinded",
+      "Whole"
       ]
-    },
+  },
     "Status": {
       "_enum": [
         "Sold",
@@ -68,7 +71,7 @@
     },
     "ProcessType": {
       "_enum": [
-        "Harvesing",
+        "Harvesting",
         "Processing",
         "Packaging",
         "Transporting",
@@ -78,6 +81,7 @@
     },
     "State": {
       "_enum": [
+        "Grinded",
         "Roasted",
         "UnRoasted"
       ]
@@ -108,11 +112,11 @@
       "attribute": "ProcessAttribute",
       "certifications": "Certifications",
       "date": "Moment",
-      "amount": "Amount","archived":"bool",
+      "amount": "Amount",
+      "archived": "bool",
       "inputAmount": "Amount",
       "processType": "ProcessType",
-      "rawMaterialId": "RawMaterialId" 
-      
+      "rawMaterialId": "RawMaterialId"
     },
     "RawMaterial": {
       "id": "RawMaterialId",
@@ -130,7 +134,6 @@
       "quantity": "Quantity",
       "sku": "SKU",
       "serial_number": "SerialNumber",
-      "product_id": "ProductId",
       "user": "AccountId",
       "buyer": "AccountId"
     },

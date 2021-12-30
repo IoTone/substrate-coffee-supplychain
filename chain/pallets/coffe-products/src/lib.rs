@@ -15,10 +15,11 @@ pub use pallet::*;
 #[frame_support::pallet]
 pub mod pallet {
     use crate::types::*;
+    use fixed::types::{U128F0, U16F0};
     use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
     use frame_system::pallet_prelude::*;
     use sp_std::{prelude::*, vec::Vec};
-    // General constraints to limit data size
+     // General constraints to limit data size
     // Note: these could also be passed as trait config parameters
     pub const PRODUCT_ID_MAX_LENGTH: usize = 36;
     pub const PRODUCT_PROP_NAME_MAX_LENGTH: usize = 10;
@@ -48,10 +49,16 @@ pub mod pallet {
         StorageMap<_, Blake2_128Concat, T::AccountId, Vec<ProductId>, ValueQuery>;
 
     #[pallet::storage]
-    #[pallet::getter(fn products_of_harv)]
+    #[pallet::getter(fn products_of_packaging)]
     pub type ProductsOfPackaging<T: Config> =
         StorageMap<_, Blake2_128Concat, Identifier, Vec<ProductId>, ValueQuery>;
 
+
+    #[pallet::storage]
+    #[pallet::getter(fn products_of_sku)]
+    pub type ProductsOfSku<T: Config> =
+            StorageMap<_, Blake2_128Concat, SKU, Vec<ProductId>, ValueQuery>;
+    
     #[pallet::storage]
     #[pallet::getter(fn owner_of)]
     pub type OwnerOf<T: Config> =
@@ -91,18 +98,22 @@ pub mod pallet {
             origin: OriginFor<T>,
             id:ProductId,
             kind: Kind,
-            SKU: SKU,
+            sku: SKU,
             lb: Decimal, 
             org: T::AccountId,
-            packagingId:Identifier
+            packaging_id:Identifier,
+            amount:Decimal,
+            price:Decimal
         ) -> DispatchResultWithPostInfo {
-            let product = Product::new(id,<pallet_timestamp::Pallet<T>>::now(), kind, SKU, lb);
+           
+            let product = Product::new(id,<pallet_timestamp::Pallet<T>>::now(), kind, sku.clone(), lb,amount,price,packaging_id.clone());
            let  id=product.product_id.clone();
            let who = ensure_signed(origin)?;
 
              <Products<T>>::insert(&id, product);
             <ProductsOfOrganization<T>>::append(&org, &id);
-            <ProductsOfPackaging<T>>::append(&packagingId, &id);
+            <ProductsOfPackaging<T>>::append(&packaging_id, &id);
+            <ProductsOfSku<T>>::append(&sku, &id);
 
             Self::deposit_event(Event::ProductRegistered(who, id, org));
 
@@ -112,12 +123,41 @@ pub mod pallet {
 
     #[allow(dead_code)]
     impl<T: Config> Pallet<T> {
-        pub fn sell_product(id: ProductId) -> Result<(), Error<T>> {
-            let product = <Products<T>>::get(&id);
-            ensure!(!product.is_some(), Error::<T>::ProductIdMissing);
-            let mut product = product.unwrap();
+        pub fn register_product_aux(
+             id:ProductId,
+            kind: Kind,
+            sku: SKU,
+            lb: Decimal, 
+            org: T::AccountId,
+            packaging_id:Identifier,
+            amount:Decimal,
+            price:Decimal
+        ) -> DispatchResultWithPostInfo {
+            sp_std::if_std! {
+                println!("Is INNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN");
+            }
+            let product = Product::new(id,<pallet_timestamp::Pallet<T>>::now(), kind, sku.clone(), lb,amount,price,packaging_id.clone());
+           let  id=product.product_id.clone();
+ 
+             <Products<T>>::insert(&id, product);
+            <ProductsOfOrganization<T>>::append(&org, &id);
+            <ProductsOfPackaging<T>>::append(&packaging_id, &id);
+            <ProductsOfSku<T>>::append(&sku, &id);
 
-            product = product.sell();
+ 
+            Ok(().into())
+        }
+        pub fn sell_product(id: ProductId,amount:Decimal) -> Result<(), Error<T>> {
+            
+            let product = <Products<T>>::get(&id);
+             let mut product = product.unwrap();
+            sp_std::if_std! {
+                println!("RESSSSSSSSSSSTINGGGGGG");
+            }
+            product = product.sell(amount);
+            sp_std::if_std! {
+                println!("UPDATEEEEEEEEE");
+            }
             <Products<T>>::insert(&id, product);
             Ok(())
         }

@@ -9,13 +9,15 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
+ 
     use crate::types::*;
+    use coffe_products::types::{Decimal, Kind};
+    use fixed::types::I16F16;
     use frame_support::{
         dispatch::{DispatchResult, DispatchResultWithPostInfo},
         ensure,
         pallet_prelude::*,
     };
-
     use frame_system::pallet_prelude::OriginFor;
     use frame_system::pallet_prelude::*;
     use sp_std::{if_std, prelude::*, vec::Vec};
@@ -44,18 +46,25 @@ pub mod pallet {
         StorageMap<_, Blake2_128Concat, Id, Sale<T::AccountId, T::Moment>, OptionQuery>;
 
     #[pallet::storage]
+    #[pallet::getter(fn retail_packaging)]
+    pub type RetailPackagings<T: Config> =
+        StorageMap<_, Blake2_128Concat, Id, RetailPackaging<T::Moment>, OptionQuery>;
+
+   
+
+    #[pallet::storage]
     #[pallet::getter(fn sales_by_org)]
     pub type SalesByOrg<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Id>, OptionQuery>;
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Id>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn retail_packaging_by_org)]
-    pub type RetailPackagingsByOrgs<T: Config> =
-        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Id>, OptionQuery>;
+    pub type RetailPackagingsByOrg<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Id>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn skus)]
-    pub type Skus<T: Config> = StorageMap<_, Blake2_128Concat, SKU, (), OptionQuery>;
+    pub type Skus<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<SKU>, ValueQuery>;
     // Pallets use events to inform users when important changes are made.
     // https://substrate.dev/docs/en/knowledgebase/runtime/events
     #[pallet::event]
@@ -87,25 +96,30 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         /// An example dispatchable that takes a singles value as a parameter, writes the value to
         /// storage and emits an event. This function must be dispatched by a signed extrinsic.
+     
+       
         #[pallet::weight(10_000)]
         pub fn create_sale(
             origin: OriginFor<T>,
             id: Id,
             currency: CurrencyType,
-            cost: Cost,
             quantity: Quantity,
             sku: SKU,
             serial_number: SerialNumber,
-            product_id: ProductId,
             buyer: T::AccountId,
+            org: T::AccountId,
         ) -> DispatchResultWithPostInfo {
             let who = ensure_signed(origin)?;
 
-            Self::validate_cost(cost.clone())?;
             Self::validate_identifier(&id)?;
             Self::validate_quantity(quantity.clone())?;
             Self::validate_new_sale(&id)?;
-
+            let _ = <coffe_products::Pallet<T>>::sell_product(sku.clone(), quantity.clone())?;
+            let product = <coffe_products::Pallet<T>>::product_by_id(sku.clone());
+            let cost = match product {
+                Some(p) =>  I16F16::from_num(quantity)  * p.price ,
+                None => fixed::types::I16F16::from_num(0),
+            };
             let sale = Sale::new(
                 id.clone(),
                 <pallet_timestamp::Pallet<T>>::now(),
@@ -114,53 +128,58 @@ pub mod pallet {
                 quantity,
                 sku,
                 serial_number,
-                product_id,
                 who,
                 buyer,
             );
-            Sales::<T>::insert(&id, sale);
+            <Sales<T>>::insert(&id, sale);
+            <SalesByOrg<T>>::append(&org,&id);
             Ok(().into())
         }
 
         #[pallet::weight(10_000)]
         pub fn create_retail_packaging(
             origin: OriginFor<T>,
-            id:Id,
+            id: Id,
             certifications: Certifications,
-            amount: Quantity,
-            amount_of_products: AmountOfProducts,
-            amount_for_products: AmountForProducts,
+            amount:Decimal ,
+            amount_of_products: Decimal,
+            amount_for_products: Decimal,
+            price_for_product: Decimal,
             sku: SKU,
             serial_number: SerialNumber,
             brand: Brand,
             origin_process: OriginProcess,
-            kind: coffe_products::types::Kind,
+            kind: Kind,
             org: T::AccountId,
         ) -> DispatchResultWithPostInfo {
-            let who = ensure_signed(origin.clone())?;
-            let retail_packaging = RetailPackaging::new(
+            
+             let retail_packaging = RetailPackaging::new(
                 id,
                 <pallet_timestamp::Pallet<T>>::now(),
                 certifications,
                 amount,
-                amount_of_products,
+                amount_of_products.clone(),
                 amount_for_products,
                 sku.clone(),
                 serial_number,
                 brand,
                 origin_process,
             );
-
             let id = retail_packaging.id.clone();
-            Skus::<T>::insert(&sku, ());
-           let _= <coffe_products::Pallet<T>>::register_product(
-               origin,
-              id.clone(),
-                kind,
-                sku,
-                amount_for_products,
-                org,
-                id.clone()
+
+            <RetailPackagings<T>>::insert(&id, retail_packaging);
+            <RetailPackagingsByOrg<T>>::append(&org, &id);
+            <Skus<T>>::append(&org, &sku);
+
+            let _ = <coffe_products::Pallet<T>>::register_product_aux(
+                 sku.clone(),
+                kind.clone(),
+                sku.clone(),
+                amount_for_products.clone(),
+                org.clone(),
+                id.clone(),
+                amount_of_products.clone(),
+                price_for_product,
             );
 
             Ok(().into())

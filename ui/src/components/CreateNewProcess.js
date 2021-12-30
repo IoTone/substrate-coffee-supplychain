@@ -5,18 +5,30 @@ import { v4 } from 'uuid';
 import { stringToHex, u8aToString } from '@polkadot/util';
 import { useSubstrate } from '../substrate-lib';
 
+import ReactTagInput from "@pathofdev/react-tag-input";
+import "@pathofdev/react-tag-input/build/index.css";
 export default function Main(props) {
   const [status, setStatus] = useState(null);
   const [rawMaterials, setRawMaterials] = useState([]);
-  const [formState, setFormState] = useState({ certifications: null, amount: 0, process: null, attributeValue: null, input_amount: 0, rawMaterial: null });
+  const [formState, setFormState] = useState({ certifications: null, amount: null, process: null, attributeValue: null, input_amount: null, rawMaterial: null });
   const { accountPair, organization } = props;
   const { api } = useSubstrate();
+  const [tags, setTags] = useState([]);
+ const { amount, process, attributeValue, certifications, input_amount, rawMaterial } = formState;
+  const onChange = (_, data) => {
+   
+    if ((data.state === "input_amount" || data.state === "amount") && parseFloat(data.value) <= 0) {
+      return
 
-  const onChange = (_, data) =>
+    }
+  if(process&&data.state === "input_amount"&&parseInt(rawMaterials.find(r => r.value === rawMaterial).remaining_amount) < parseInt(data.value))
+  
+    return
+  
     setFormState(prev => ({ ...prev, [data.state]: data.value }));
-
-  const { amount, process, attributeValue, certifications, input_amount, rawMaterial } = formState;
-  const processTypes = [{ text: "Harvesing", value: "Harvesing" },
+  }
+ 
+  const processTypes = [{ text: "Harvesting", value: "Harvesting" },
   { text: "Processing", value: "Processing" },
   { text: "Packaging", value: "Packaging" },
   { text: "Transporting", value: "Transporting" },
@@ -37,9 +49,10 @@ export default function Main(props) {
       case processTypes[3].value: return attributeName[3]
       case processTypes[4].value: return attributeName[4]
       case processTypes[5].value: return attributeName[5]
+      default: return "Procces value"
     }
-  }
-  
+   }
+
   useEffect(() => {
     api.query.rawMaterials.rawMaterialsOfOrganization(organization, async rawMaterialsId => {
       api.query.rawMaterials.rawMaterials.multi(rawMaterialsId, async rawMaterials => {
@@ -47,21 +60,21 @@ export default function Main(props) {
           .filter(shipment => !shipment.isNone)
           .map(shipment => shipment.unwrap()).filter(p => p.remaining_amount.toNumber() > 0);
         await Promise.all(validRawMaterials.map(async material => {
-           const process = await api.query.supplyChain.processes((material.origin_process.toString()))
+          const process = await api.query.supplyChain.processes((material.origin_process.toString()))
           if (!process.isNone) {
             const processUwrap = process.unwrap()
-            material.originProcess=processUwrap.processType.toString()
+            material.originProcess = processUwrap.processType.toString()
           }
-         
+
         }))
-        
-        validRawMaterials=validRawMaterials.filter(m=>processTypes.findIndex(pt=> pt.value===m.originProcess)<processTypes.findIndex(pt=> pt.value===process))
-         const convertedMaterials = validRawMaterials.map(rawMaterial => ({ text: (rawMaterial.state.toString() === "UnRoasted" ? "Unroasted beans " : "Roasted beans ") + ": remaining amount " + rawMaterial.remaining_amount.toNumber() + " lb"+(rawMaterial.originProcess? " from: "+rawMaterial.originProcess:""), value: u8aToString(rawMaterial.id) }))
+        if (process !== processTypes[3].value)
+          validRawMaterials = validRawMaterials.filter(m => processTypes.findIndex(pt => pt.value === m.originProcess) < processTypes.findIndex(pt => pt.value === process))
+        const convertedMaterials = validRawMaterials.map(rawMaterial => ({ text: (rawMaterial.state.toString() === "UnRoasted" ? "Unroasted beans " : "Roasted beans ") + ": remaining amount " + rawMaterial.remaining_amount.toNumber() + " lb" + (rawMaterial.originProcess ? " from: " + rawMaterial.originProcess : ""), value: u8aToString(rawMaterial.id) ,remaining_amount:rawMaterial.remaining_amount.toNumber()}))
         setRawMaterials(convertedMaterials)
       });
     });
 
-  }, [organization,process]);
+  }, [organization, process]);
 
 
   return <Card fluid color='blue'>
@@ -69,8 +82,9 @@ export default function Main(props) {
     <Card.Content>
       <Card.Description>
         <Form>
-          <Form.Field>
-            <h3>Process</h3>
+          <Form.Field required>
+
+            <label>Process</label>
             <Form.Dropdown selection fluid
               placeholder='Select Organization'
               options={processTypes}
@@ -78,8 +92,8 @@ export default function Main(props) {
               value={process}
             />
           </Form.Field>
-          <Form.Field>
-            <h3>Raw Material</h3>
+          <Form.Field required>
+            <label>Raw Material</label>
             <Form.Dropdown selection fluid
               placeholder='Select Raw Material'
               options={rawMaterials}
@@ -89,27 +103,30 @@ export default function Main(props) {
           </Form.Field>
           <Form.Input
             fluid required
-            label={getAttributeName}
+            label={getAttributeName()}
             type='text'
             state='attributeValue'
             onChange={onChange}
           />
-
+          <Form.Field required>
+            <label>Certifications</label>
+            <ReactTagInput
+              tags={tags}
+              placeholder="Certifications"
+              onChange={(newTags) => setTags(newTags)}
+            /></Form.Field>
           <Form.Input
             fluid required
-            label='Certifications'
-            type='text'
-            state='certifications'
-            onChange={onChange}
-          />
-          <Form.Input
-            fluid required
+            type="number"
             label='Input amount'
             state='input_amount'
+            value={input_amount}
             onChange={onChange}
           />
           <Form.Input
             fluid required
+            type="number"
+            value={amount}
             label='Produced amount'
             state='amount'
             onChange={onChange}
@@ -124,7 +141,7 @@ export default function Main(props) {
               attrs={{
                 palletRpc: 'supplyChain',
                 callable: 'registerProcess',
-                inputParams: [v4(), [getAttributeName(), stringToHex(attributeValue)], [stringToHex(certifications)], amount, input_amount, process, rawMaterial, organization],
+                inputParams: [v4(), [getAttributeName(), stringToHex(attributeValue)], tags.map(stringToHex), amount, input_amount, process, rawMaterial, organization],
                 paramFields: [true, true, true, true, true, true, true, true]
               }}
             />

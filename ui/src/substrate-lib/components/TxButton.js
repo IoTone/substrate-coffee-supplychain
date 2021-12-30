@@ -14,7 +14,8 @@ function TxButton ({
   style = null,
   type = 'QUERY',
   attrs = null,
-  disabled = false
+  disabled = false,
+  setClean=()=>{}
 }) {
   // Hooks
   const { api } = useSubstrate();
@@ -99,7 +100,7 @@ function TxButton ({
     const txExecute = transformed
       ? api.tx[palletRpc][callable](...transformed)
       : api.tx[palletRpc][callable]();
-
+console.log({fromAcct,transformed});
     const unsub = await txExecute.signAndSend(fromAcct, txResHandler)
       .catch(txErrHandler);
     setUnsub(() => unsub);
@@ -222,7 +223,10 @@ function TxButton ({
       color={color}
       style={style}
       type='submit'
-      onClick={transaction}
+      onClick={(e)=>{
+        transaction(e)
+        setClean()
+      }}
       disabled={ disabled || !palletRpc || !callable || !allParamsFilled() ||
         ((isSudo() || isUncheckedSudo()) && !isSudoer(accountPair)) }
     >

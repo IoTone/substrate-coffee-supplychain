@@ -4,8 +4,7 @@ import {
   Switch,
   Route
 } from 'react-router-dom';
-
-import Dashboard from './Dashboard';
+ import Dashboard from './Dashboard';
 import Homepage from './Homepage';
 import 'semantic-ui-css/semantic.min.css';
 

@@ -27,7 +27,7 @@ pub enum AttributeName {
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
 
 pub enum ProcessType {
-    Harvesing,
+    Harvesting,
     Processing,
     Packaging,
     Transporting,
@@ -43,9 +43,9 @@ pub struct SupplyProcess<Moment> {
     pub date: Moment,
     pub amount: Amount,
     pub archived:bool,
-    pub inputAmount: Amount,
-    pub processType: ProcessType,
-    pub rawMaterialId: RawMaterialId,
+    pub input_amount: Amount,
+    pub process_type: ProcessType,
+    pub raw_material_id: RawMaterialId,
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
@@ -61,9 +61,9 @@ impl<Moment> SupplyProcess<Moment> {
         certifications: Certifications,
         date: Moment,
         amount: Amount,
-        inputAmount: Amount,
-        processType: ProcessType,
-        rawMaterialId: RawMaterialId,
+        input_amount: Amount,
+        process_type: ProcessType,
+        raw_material_id: RawMaterialId,
         
     ) -> Self {
      
@@ -73,9 +73,9 @@ impl<Moment> SupplyProcess<Moment> {
             attribute,
             certifications,
             date,
-            inputAmount,
-            processType,
-            rawMaterialId,
+            input_amount,
+            process_type,
+            raw_material_id,
             archived:false
         }
     }

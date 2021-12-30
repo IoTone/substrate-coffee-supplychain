@@ -45,8 +45,7 @@ export default function Main (props) {
           setSelectedOrganization(addr);
           setSelected(addr);
         } catch (error) {
-          console.log("eooe",error);
-        }
+         }
          
       
  
