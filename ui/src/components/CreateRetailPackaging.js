@@ -74,7 +74,7 @@ export default function Main(props) {
           break;
         case processesTypes[3]: setFormState({ ...formState, kind: "Bag" })
           break;
-        case processesTypes[4]: setFormState({ ...formState, kind: "Bag Roasted" })
+        case processesTypes[4]: setFormState({ ...formState, kind: "BagRoasted" })
           break;
         case processesTypes[5]: setFormState({ ...formState, kind: "Grinded" })
           break;
