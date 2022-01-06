@@ -9,7 +9,7 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
- 
+
     use crate::types::*;
     use coffe_products::types::{Decimal, Kind};
     use fixed::types::I16F16;
@@ -50,8 +50,6 @@ pub mod pallet {
     pub type RetailPackagings<T: Config> =
         StorageMap<_, Blake2_128Concat, Id, RetailPackaging<T::Moment>, OptionQuery>;
 
-   
-
     #[pallet::storage]
     #[pallet::getter(fn sales_by_org)]
     pub type SalesByOrg<T: Config> =
@@ -65,6 +63,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn skus)]
     pub type Skus<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<SKU>, ValueQuery>;
+
     // Pallets use events to inform users when important changes are made.
     // https://substrate.dev/docs/en/knowledgebase/runtime/events
     #[pallet::event]
@@ -83,6 +82,7 @@ pub mod pallet {
         InvalidCost,
         /// Cannot add a user to an organization to which they already belong.
         InvalidQuantity,
+        InvalidSku,
         InvalidOrMissingIdentifier,
     }
 
@@ -96,8 +96,7 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         /// An example dispatchable that takes a singles value as a parameter, writes the value to
         /// storage and emits an event. This function must be dispatched by a signed extrinsic.
-     
-       
+
         #[pallet::weight(10_000)]
         pub fn create_sale(
             origin: OriginFor<T>,
@@ -117,7 +116,7 @@ pub mod pallet {
             let _ = <coffe_products::Pallet<T>>::sell_product(sku.clone(), quantity.clone())?;
             let product = <coffe_products::Pallet<T>>::product_by_id(sku.clone());
             let cost = match product {
-                Some(p) =>  I16F16::from_num(quantity)  * p.price ,
+                Some(p) => quantity * p.price,
                 None => fixed::types::I16F16::from_num(0),
             };
             let sale = Sale::new(
@@ -132,7 +131,7 @@ pub mod pallet {
                 buyer,
             );
             <Sales<T>>::insert(&id, sale);
-            <SalesByOrg<T>>::append(&org,&id);
+            <SalesByOrg<T>>::append(&org, &id);
             Ok(().into())
         }
 
@@ -141,7 +140,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             id: Id,
             certifications: Certifications,
-            amount:Decimal ,
+            amount: Decimal,
             amount_of_products: Decimal,
             amount_for_products: Decimal,
             price_for_product: Decimal,
@@ -152,8 +151,7 @@ pub mod pallet {
             kind: Kind,
             org: T::AccountId,
         ) -> DispatchResultWithPostInfo {
-            
-             let retail_packaging = RetailPackaging::new(
+            let retail_packaging = RetailPackaging::new(
                 id,
                 <pallet_timestamp::Pallet<T>>::now(),
                 certifications,
@@ -166,13 +164,15 @@ pub mod pallet {
                 origin_process,
             );
             let id = retail_packaging.id.clone();
+            let list = <Skus<T>>::get(&org);
+            Self::validate_sku(list,sku.clone())?;
 
             <RetailPackagings<T>>::insert(&id, retail_packaging);
             <RetailPackagingsByOrg<T>>::append(&org, &id);
             <Skus<T>>::append(&org, &sku);
 
             let _ = <coffe_products::Pallet<T>>::register_product_aux(
-                 sku.clone(),
+                sku.clone(),
                 kind.clone(),
                 sku.clone(),
                 amount_for_products.clone(),
@@ -213,7 +213,8 @@ pub mod pallet {
             ensure!(cost > 0, Error::<T>::InvalidCost);
             Ok(())
         }
-        pub fn validate_sku(sale_id: Id) -> Result<(), Error<T>> {
+        pub fn validate_sku(list:Vec<Vec<u8>>,sku:SKU) -> Result<(), Error<T>> {
+             ensure!(!list.contains(&sku), Error::<T>::InvalidSku);
             Ok(())
         }
     }

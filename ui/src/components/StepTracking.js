@@ -2,35 +2,63 @@ import React, { useEffect, useState } from 'react';
 import { Form, Card, Step, Icon, List } from 'semantic-ui-react';
 import { TxButton } from '../substrate-lib/components';
 import { v4 } from 'uuid';
-import { hexToString, hexToU8a, stringToHex, u8aToString } from '@polkadot/util';
+import { hexToString, hexToU8a, loggerFormat, stringToHex, u8aToString } from '@polkadot/util';
 
 export default function Main(props) {
 
   const [steps, setSteps] = useState([]);
   const { prevStepsConfig, organization } = props;
-
-  const { steps: prevSteps, packaging_id } = prevStepsConfig || {}
+   const { steps: prevSteps=[], packaging_id, processId, materialId } = prevStepsConfig || {}
   useEffect(() => {
     (async function () {
-      if (packaging_id) {
-        const newSteps = [...prevSteps]
+         const newSteps = [...prevSteps]
+        let prevStep
+        if (packaging_id) {
+           let packaging = await api.query.retailTransaction.retailPackagings(packaging_id)
+          packaging = packaging.unwrap()
+          newSteps.push({ type: 2, value: packaging })
+          prevStep = packaging.origin_process.toString()
+        } else if (processId)
+          prevStep = processId
+        if (materialId) {
+ 
+          prevStep = materialId
 
-        let packaging = await api.query.retailTransaction.retailPackagings(packaging_id)
-        packaging = packaging.unwrap()
-        newSteps.push({ type: 2, value: packaging })
-        let prevStep = packaging.origin_process.toString()
-        while (prevStep) {
-          let process = await api.query.supplyChain.processes(prevStep)
-          process = process.unwrap()
-          newSteps.push({ type: 1, value: process })
-          prevStep = process.rawMaterialId.toString()
-          let material = await api.query.rawMaterials.rawMaterials(prevStep)
-          material = material.unwrap()
-          newSteps.push({ type: 0, value: material })
-          prevStep = material.origin_process ? material.origin_process.toString() : null
-          setSteps([...newSteps])
+             let material = await api.query.rawMaterials.rawMaterials(prevStep)
+            material = material.unwrap()
+            newSteps.push({ type: 0, value: material })
+            prevStep = material.origin_process ? material.origin_process.toString() : null
+
+          while (prevStep) {
+         
+            let process = await api.query.supplyChain.processes(prevStep)
+            process = process.unwrap()
+            newSteps.push({ type: 1, value: process })
+            prevStep = process.rawMaterialId.toString()
+
+            let material = await api.query.rawMaterials.rawMaterials(prevStep)
+            material = material.unwrap()
+            newSteps.push({ type: 0, value: material })
+            prevStep = material.origin_process ? material.origin_process.toString() : null
+
+          }
+        } else {
+ 
+           while (prevStep) {
+            let process = await api.query.supplyChain.processes(prevStep)
+            process = process.unwrap()
+            newSteps.push({ type: 1, value: process })
+            prevStep = process.rawMaterialId.toString()
+
+            let material = await api.query.rawMaterials.rawMaterials(prevStep)
+            material = material.unwrap()
+            newSteps.push({ type: 0, value: material })
+            prevStep = material.origin_process ? material.origin_process.toString() : null
+          }
         }
-      }
+        setSteps([...newSteps])
+
+      
     })()
 
 

@@ -225,7 +225,7 @@ console.log({fromAcct,transformed});
       type='submit'
       onClick={(e)=>{
         transaction(e)
-        setClean()
+        setClean(e)
       }}
       disabled={ disabled || !palletRpc || !callable || !allParamsFilled() ||
         ((isSudo() || isUncheckedSudo()) && !isSudoer(accountPair)) }

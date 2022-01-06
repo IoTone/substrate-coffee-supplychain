@@ -5,6 +5,7 @@ import { v4 } from 'uuid';
 import { hexToString, hexToU8a, stringToHex, u8aToString } from '@polkadot/util';
 import ReactTagInput from "@pathofdev/react-tag-input";
 import "@pathofdev/react-tag-input/build/index.css";
+import ReactTooltip from 'react-tooltip';
 
 export default function Main(props) {
   const processesTypes = ["Harvesting",
@@ -16,15 +17,17 @@ export default function Main(props) {
   const [status, setStatus] = useState(null);
   const [processes, setProcesses] = useState([]);
   const [tags, setTags] = useState([]);
-  const [formState, setFormState] = useState({ certifiations: null, amount: null, amount_of_products: null, price_for_products: null, amount_for_products: null, sku: null, serial_number: null, brand: null, origin_process: null, kind: null });
+  const [formState, setFormState] = useState({ certifiations: null, amount: 0, amount_of_products: 0, price_for_products: 0, amount_for_products: 0, sku: null, serial_number: null, brand: null, origin_process: null, kind: null });
   const { accountPair, organization } = props;
 
   const onChange = (_, data) => {
-    if ((data.state === "amount" || data.state === "amount_of_products" || data.state === "amount_for_products" || data.state === "price_for_products") ) {
-      if(!data.value.match(/^[0-9]*$/))
-      return
-      if ( parseFloat(data.value) <= 0)
-      return
+    if(!data.value.match(/^[a-zA-Z0-9_.-]*$/))
+    return
+    if ((data.state === "amount" || data.state === "amount_of_products" || data.state === "amount_for_products" || data.state === "price_for_products")) {
+      if (!data.value.match(/^[0-9]*$/))
+        return
+      if (parseFloat(data.value) <= 0)
+        return
     }
     setFormState(prev => ({ ...prev, [data.state]: data.value }));
   }
@@ -81,7 +84,6 @@ export default function Main(props) {
       }
 
     }
-    console.log([[stringToHex(certifiations)], amount, amount_of_products, amount_for_products, stringToHex(sku), stringToHex(serial_number), stringToHex(brand), origin_process, stringToHex(kind), kind, organization]);
     if (amount_of_products && amount)
       setFormState({ ...formState, amount_for_products: parseFloat(amount) / parseInt(amount_of_products) })
   }, [origin_process, amount, amount_of_products, processes])
@@ -93,6 +95,9 @@ export default function Main(props) {
           <Form.Field required >
             <label>Process</label>
             <Form.Dropdown selection fluid
+             data-for="process"
+             data-tip="Kind <br />of<br />process where comes from"
+             data-iscapture="true"
               placeholder='Select process'
               options={processes}
               onChange={(_, dropdown) => {
@@ -105,21 +110,31 @@ export default function Main(props) {
             />
           </Form.Field>
           <Form.Input
+               data-for="kind"
+               data-tip="kind of product"
+               data-iscapture="true"
             fluid required
-             label='Kind'
+            label='Kind'
             type='text'
             state="kind"
             value={kind}
-           />
+          />
           <Form.Input
-             
+            data-for="inputamount"
+            data-tip="input amount of material"
+            data-iscapture="true"
+            disabled={!origin_process}
             fluid required
             label='Input amount (lb)'
             type='text'
             state="amount"
+
             value={amount}
-           />
+          />
           <Form.Input
+            data-for="amountforsale"
+            data-tip="amount of products<br />to sale"
+            data-iscapture="true"
             fluid required
             label='Amount of products'
             type='text'
@@ -128,13 +143,20 @@ export default function Main(props) {
             onChange={onChange}
           />
           <Form.Input
+            data-for="amountoflb"
+            data-tip="amount of lb<br />for product"
+            data-iscapture="true"
             fluid required
-             label='Amount of products (lb)'
+            disabled={!amount_of_products}
+            label='Amount for products (lb)'
             type='text'
             state="amount_for_products"
             value={amount_for_products}
-           />
+          />
           <Form.Input
+            data-for="price"
+            data-tip="price for each<br />product for sale"
+            data-iscapture="true"
             fluid required
             label='Price for products'
             type='text'
@@ -143,6 +165,9 @@ export default function Main(props) {
             onChange={onChange}
           />
           <Form.Input
+            data-for="sku"
+            data-tip="sku is a distinct <br />type of item for sale"
+            data-iscapture="true"
             fluid required
             label='SKU'
             type='text'
@@ -151,6 +176,9 @@ export default function Main(props) {
             onChange={onChange}
           />
           <Form.Input
+            data-for="brand"
+            data-tip="Serial number"
+            data-iscapture="true"
             fluid required
             label='Serial number'
             type='text'
@@ -159,6 +187,9 @@ export default function Main(props) {
             onChange={onChange}
           />
           <Form.Input
+            data-for="brand"
+            data-tip="brand <br />for <br />the product"
+            data-iscapture="true"
             fluid required
             label='Brand'
             type='text'
@@ -166,7 +197,9 @@ export default function Main(props) {
             value={brand}
             onChange={onChange}
           />
-          <Form.Field required>
+          <Form.Field required data-for="certs"
+            data-tip="certifications <br />for <br />the process"
+            data-iscapture="true">
             <label>Certifications</label>
             <ReactTagInput
               tags={tags}
@@ -179,6 +212,11 @@ export default function Main(props) {
 
           <Form.Field>
             <TxButton
+              setClean={(e) => {
+                e.preventDefault()
+                setTags([])
+                setFormState({ certifiations: null, amount: 0, amount_of_products: 0, price_for_products: 0, amount_for_products: 0, sku: "", serial_number: "", brand: "", origin_process: null, kind: null })
+              }}
               accountPair={accountPair}
               label='Submit'
               type='SIGNED-TX'
@@ -196,5 +234,63 @@ export default function Main(props) {
         </Form>
       </Card.Description>
     </Card.Content>
+   
+    
+    <ReactTooltip
+      id="process"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="kind"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="inputamount"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="amountforsale"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="price"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="sku"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="serialnumber"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="certs"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
   </Card>;
 }

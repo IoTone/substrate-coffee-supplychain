@@ -6,12 +6,25 @@ import { useSubstrate } from '../substrate-lib';
 
 export default function Main(props) {
   const { organization, setSteps } = props;
+  const { keyring } = useSubstrate();
+
   const { api } = useSubstrate();
   const [sales, setSales] = useState([]);
+  const keyringOptions = keyring.getPairs().map(account => ({
+    key: account.address,
+    value: account.address,
+    text: account.meta.name.toUpperCase(),
+    icon: 'user'
+  }));
 
   useEffect(() => {
     let unsub = null;
-
+    const keyringOptions = keyring.getPairs().map(account => ({
+      key: account.address,
+      value: account.address,
+      text: account.meta.name.toUpperCase(),
+      icon: 'user'
+    }));
     async function getSales(organization) {
       unsub = await api.query.retailTransaction.salesByOrg(organization, salesIds => {
         api.query.retailTransaction.sales.multi(salesIds, salesList => {
@@ -42,11 +55,10 @@ export default function Main(props) {
     const sku = sale.sku.toString()
     const product = await api.query.coffeProducts.products(sku)
     const unwrapProduct = product.unwrap()
-console.log({unwrapProduct});
     setSteps({
       packaging_id: unwrapProduct.packaging_id.toString(),
-      steps:[{type:4,value:sale},{type:3,value:unwrapProduct}]
-  }
+      steps: [{ type: 4, value: sale }, { type: 3, value: unwrapProduct }]
+    }
     )
   }
   return <Table color='blue'>
@@ -64,8 +76,8 @@ console.log({unwrapProduct});
       const id = u8aToString(sale.id);
       return <Table.Row key={id} >
         <Table.Cell>{id}</Table.Cell>
-        <Table.Cell>{sale.buyer.toString()}</Table.Cell>
-        <Table.Cell>{hexToString(sale.currency_type.toString()) }</Table.Cell>
+        <Table.Cell>{keyringOptions.find(acount => acount.value === sale.buyer.toString()).text + " (" + sale.buyer.toString() + ")"}</Table.Cell>
+        <Table.Cell>{hexToString(sale.currency_type.toString())}</Table.Cell>
         <Table.Cell>{hexToString(sale.sku.toString())}</Table.Cell>
         <Table.Cell ><Button onClick={() => getProduct(sale)}>Details</Button></Table.Cell>
 

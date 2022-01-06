@@ -5,7 +5,7 @@ import OrganizationSelector from './OrganizationSelector';
 
 import RegisterSale from './RegisterSale';
 import SalesList from './SalesList';
-import ProductTracking from './ProductTracking';
+import StepTracking from './StepTracking';
 import Events from './Events';
 
 export default function Main(props) {
@@ -39,7 +39,7 @@ export default function Main(props) {
       organization={selectedOrganization}
       setSteps={setSteps}
     />
-    <ProductTracking prevStepsConfig={steps}/>
+    <StepTracking prevStepsConfig={steps}/>
   </Container>
     ;
 }

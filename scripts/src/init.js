@@ -5,7 +5,7 @@ import submit from './lib/submit-signed-xt.js';
 import types from './lib/types.js';
 
 async function main() {
-  const provider = new WsProvider("ws://186.116.52.169:9944");
+  const provider = new WsProvider("ws://186.117.170.215:9944");
   const api = await ApiPromise.create({ provider, types });
   const keyring = new Keyring({ type: 'sr25519' });
 

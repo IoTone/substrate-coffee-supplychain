@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Form, Card } from 'semantic-ui-react';
+import React, { useDebugValue, useEffect, useState } from 'react';
+import { Form, Card, Button } from 'semantic-ui-react';
 import { TxButton } from '../substrate-lib/components';
 import { v4 } from 'uuid';
 import { stringToHex, u8aToString } from '@polkadot/util';
@@ -7,27 +7,35 @@ import { useSubstrate } from '../substrate-lib';
 
 import ReactTagInput from "@pathofdev/react-tag-input";
 import "@pathofdev/react-tag-input/build/index.css";
+import ReactTooltip from 'react-tooltip';
 export default function Main(props) {
   const [status, setStatus] = useState(null);
   const [rawMaterials, setRawMaterials] = useState([]);
-  const [formState, setFormState] = useState({ certifications: null, amount: null, process: null, attributeValue: null, input_amount: null, rawMaterial: null });
+  const [formState, setFormState] = useState({ certifications: null, amount: 0, process: null, attributeValue: null, input_amount: 0, rawMaterial: null });
   const { accountPair, organization } = props;
   const { api } = useSubstrate();
   const [tags, setTags] = useState([]);
- const { amount, process, attributeValue, certifications, input_amount, rawMaterial } = formState;
+  const { amount, process, attributeValue, certiications, input_amount, rawMaterial } = formState;
   const onChange = (_, data) => {
-   
-    if ((data.state === "input_amount" || data.state === "amount") && parseFloat(data.value) <= 0) {
-      return
+    if(!data.value.match(/^[a-zA-Z0-9_.-]*$/))
+    return
+    if ((data.state === "input_amount" || data.state === "amount")) {
+      if (!data.value.match(/^[0-9]*$/)) {
+        return
+      }
+
+      if (parseFloat(data.value) <= 0)
+        return
+
 
     }
-  if(process&&data.state === "input_amount"&&parseInt(rawMaterials.find(r => r.value === rawMaterial).remaining_amount) < parseInt(data.value))
-  
-    return
-  
+    if (process && data.state === "input_amount" && parseInt(rawMaterials.find(r => r.value === rawMaterial).remaining_amount) < parseInt(data.value))
+
+      return
+
     setFormState(prev => ({ ...prev, [data.state]: data.value }));
   }
- 
+
   const processTypes = [{ text: "Harvesting", value: "Harvesting" },
   { text: "Processing", value: "Processing" },
   { text: "Packaging", value: "Packaging" },
@@ -51,7 +59,7 @@ export default function Main(props) {
       case processTypes[5].value: return attributeName[5]
       default: return "Procces value"
     }
-   }
+  }
 
   useEffect(() => {
     api.query.rawMaterials.rawMaterialsOfOrganization(organization, async rawMaterialsId => {
@@ -67,15 +75,20 @@ export default function Main(props) {
           }
 
         }))
-        if (process !== processTypes[3].value)
-          validRawMaterials = validRawMaterials.filter(m => processTypes.findIndex(pt => pt.value === m.originProcess) < processTypes.findIndex(pt => pt.value === process))
-        const convertedMaterials = validRawMaterials.map(rawMaterial => ({ text: (rawMaterial.state.toString() === "UnRoasted" ? "Unroasted beans " : "Roasted beans ") + ": remaining amount " + rawMaterial.remaining_amount.toNumber() + " lb" + (rawMaterial.originProcess ? " from: " + rawMaterial.originProcess : ""), value: u8aToString(rawMaterial.id) ,remaining_amount:rawMaterial.remaining_amount.toNumber()}))
-        setRawMaterials(convertedMaterials)
+        if (process === processTypes[0].value)
+          validRawMaterials = validRawMaterials.filter(m => m.originProcess === undefined)
+        else if (process !== processTypes[3].value)
+          validRawMaterials = validRawMaterials.filter(m => m.originProcess && (processTypes.findIndex(pt => pt.value === m.originProcess) < processTypes.findIndex(pt => pt.value === process)))
+
+        const convertedMaterials = validRawMaterials.map(rawMaterial => ({ text: (rawMaterial.state.toString() === "UnRoasted" ? "Unroasted beans " : "Roasted beans ") + ": remaining amount " + rawMaterial.remaining_amount.toNumber() + " lb" + (rawMaterial.originProcess ? " from: " + rawMaterial.originProcess : ""), value: u8aToString(rawMaterial.id), remaining_amount: rawMaterial.remaining_amount.toNumber() }))
+        setRawMaterials(convertedMaterials||[])
       });
     });
 
   }, [organization, process]);
-
+  useEffect(() => {
+    console.log({ formState });
+  }, [formState])
 
   return <Card fluid color='blue'>
     <Card.Content style={{ flexGrow: 0 }} header='Register new process' />
@@ -85,7 +98,11 @@ export default function Main(props) {
           <Form.Field required>
 
             <label>Process</label>
-            <Form.Dropdown selection fluid
+            <Form.Dropdown
+              data-for="process"
+              data-tip="Kind <br />of<br />process"
+              data-iscapture="true"
+              selection fluid
               placeholder='Select Organization'
               options={processTypes}
               onChange={(_, dropdown) => setFormState({ ...formState, process: dropdown.value })}
@@ -94,7 +111,11 @@ export default function Main(props) {
           </Form.Field>
           <Form.Field required>
             <label>Raw Material</label>
-            <Form.Dropdown selection fluid
+            <Form.Dropdown
+              data-for="kind"
+              data-tip="Kind <br />of<br />raw material"
+              data-iscapture="true"
+              selection fluid
               placeholder='Select Raw Material'
               options={rawMaterials}
               onChange={(_, dropdown) => setFormState({ ...formState, rawMaterial: dropdown.value })}
@@ -106,34 +127,52 @@ export default function Main(props) {
             label={getAttributeName()}
             type='text'
             state='attributeValue'
+            value={attributeValue}
             onChange={onChange}
           />
-          <Form.Field required>
+          <Form.Field required
+            data-for="certs"
+            data-tip="certifications <br />for <br />the process"
+            data-iscapture="true">
             <label>Certifications</label>
             <ReactTagInput
+
               tags={tags}
               placeholder="Certifications"
               onChange={(newTags) => setTags(newTags)}
             /></Form.Field>
           <Form.Input
             fluid required
-            type="number"
+            data-for="input"
+            data-tip="the input amount of<br /> raw material for <br />the process"
+            data-iscapture="true"
+            disabled={!rawMaterial}
+            type="text"
             label='Input amount'
             state='input_amount'
             value={input_amount}
             onChange={onChange}
           />
           <Form.Input
+            data-for="produced"
+            data-tip="the Produced amount of<br /> of <br />the process"
+            data-iscapture="true"
             fluid required
-            type="number"
+            type="text"
             value={amount}
             label='Produced amount'
             state='amount'
             onChange={onChange}
           />
           <Form.Field>
+
             <TxButton
               accountPair={accountPair}
+              setClean={(e) => {
+                e.preventDefault()
+                setTags([])
+                setFormState({ certifications: null, amount: 0, process: null, attributeValue: "", input_amount: 0, rawMaterial: null })
+              }}
               label='Submit'
               type='SIGNED-TX'
               setStatus={setStatus}
@@ -150,5 +189,47 @@ export default function Main(props) {
         </Form>
       </Card.Description>
     </Card.Content>
+    <ReactTooltip
+      id="process"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="kind"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="certs"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="amount"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="input"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
+    <ReactTooltip
+      id="produced"
+      place="left"
+      type="info"
+      effect="solid"
+      multiline={true}
+    />
   </Card>;
 }
