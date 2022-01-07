@@ -4,8 +4,6 @@
 
 ## *Status:  *
  
-> Please use this project as an example to learn from, not to use as a basis for starting a
-> new Substrate project intended to go to production.
 
 This sample project demonstrates how the [Substrate](https://www.substrate.io/) framework for
 building blockchains and its standard
@@ -75,7 +73,8 @@ OR
   # Launch the node in development mode and do not persist chain state
     cargo run -- --dev --tmp
    ```
-  
+ (if you want to use the node from external mode use the command ```bash cargo run -- --dev --tmp --ws--external   ``` or ```bash ./target/release/enterprise-sample --dev --tmp --ws--external   ```  you can find more info here [https://github.com/substrate-developer-hub/substrate-node-template]) 
+ 
 - Launch the [front-end](ui)
 
   ```bash
@@ -137,20 +136,16 @@ function:
   `EnsureOrg`, that validates whether or not an account owns or is a member of at least one
   organization. The `EnsureOrg` origin is used to control access to many of the chain's
   capabilities, including the ability to create roles with the RBAC pallet.
-- [Product Registry pallet](chain/pallets/product-registry/src/lib.rs) - This pallet maintains a
-  registry of products and maps each product to the organization to which it belongs. A product is
-  defined by three required properties (an ID, an owner, and a time of creation), and may have one
-  or more optional user-defined properties. The `EnsureOrg` origin is used to control the accounts
-  that are allowed to create products.
-- [Product Tracking pallet](chain/pallets/product-tracking/src/lib.rs) - The Product Tracking pallet
-  tracks shipments of products as they move throughout the supply chain. The `EnsureOrg` origin is
-  used to control the accounts that are allowed to interact with this pallet. Shipments, like
-  products, are assigned an ID and associated with an organization. This pallet supports tracking
-  several types of shipping events: registration, pickup, scan, and delivery. With the exception of
-  registration, shipment events may be associated with a list of sensor readings. Shipment events
-  are placed in a queue that is monitored by an
-  [off-chain worker](https://substrate.dev/docs/en/knowledgebase/runtime/off-chain-workers); when
-  events appear in this queue the off-chain worker sends them to an HTTP listener.
+- [Raw materials pallet](chain/pallets/raw-materials/src/lib.rs) - This pallet maintains a
+  registry of raw materials and maps each material to the organization to which it belongs. A raw material is
+  defined by six required properties (an ID, an origin process, a time of creation, state, amount and remaining amount) 
+- [supply Chain  pallet](chain/pallets/supply-chain/src/lib.rs) - The Supply chain pallet save and handle all the process from the beans to sale coffee products, going through Harvesting, Processing, Packaging, Transporting, Roasting, Grinding
+
+- [Retail transaction pallet](chain/pallets/retail-transactin/src/lib.rs) - saves and handles the retail packaging creating a sku for the products, amont of produtcs, etc. also handles the retail sales
+   
+- [coffee products pallet](chain/pallets/coffee-products/src/lib.rs) - saves and handles the coffee products, amount created, remaining amount, date of creation, lb, price, kind of product(grinded, roasted,etc )
+
+ 
 
 ### Demo Steps
 
@@ -185,22 +180,30 @@ function:
 
    ![create org](assets/img/demo/05-create-org.png)
 
-1. Navigate to the Products tab and create two products.
+1. Navigate to the Raw material tab and create raw material.
 
-   ![create products](assets/img/demo/06-create-products.png)
+   ![create rawMaterial](assets/img/demo/1.png)
 
-1. Use the Shipments tab to create a shipment with the two products that were created in the
-   previous step.
+1. Use the Process tab to create register a new process whit the raw material that were created in the
+   previous step, the input amount is how much of the raw material you want to use, and the produced is the material created for in process (then you can use that produced amount to retail packaging or to create a new raw material for another process)
 
-   ![create shipment](assets/img/demo/07-create-shipment.png)
+   ![create process](assets/img/demo/2.png)
 
-1. Navigate to the Tracking tab and use its UI to pickup, scan, and deliver the package. Note: don't
-   try to include a sensor reading in a Scan or Deliver event due to an unresolved bug in this
-   project.
+1. Navigate to the raw material tab and use the previous step created, this will create a new raw material for another step  
 
-   ![pickup shipment](assets/img/demo/08-pickup-shipment.png)
-
-   ![scan shipment](assets/img/demo/09-scan-shipment.png)
+   ![pickup shipment](assets/img/demo/3.png)
+   
+1. Navigate to the Process tab and you will can continue with another process with the input of the previously raw material
+   ![scan shipment](assets/img/demo/5.png)
+   
+   
+ 1. Navigate to the retail Packaging tab when you want to create the products for sale, you will have to select the process where the material comes from, and the amount of product that you want to create, as well you will have to introduce a unique SKU and all the others requeriodes fields
+   ![scan shipment](assets/img/demo/6.png)
+   
+ 1. And if you go to sale tab, you can create a new sale, where you will select the sku of the product to sale, the amount of product and the buyer
+   ![scan shipment](assets/img/demo/6.png) 
+  
+  ## IN EVERY STEP YOU CAN TRACK ALL THE MATERIALS, PROCESS, PACKAGINGS AND SALES 
 
 ## Related Github Repositories
 
@@ -208,4 +211,4 @@ function:
 
 ## Disclaimer
 
-This project is intended for demonstration purposes and is not audited or ready for production use.
+This project is intended for demonstration purposes and is not audited or ready for production use and was based on (https://github.com/IoTone/substrate-enterprise-sample-v3)
