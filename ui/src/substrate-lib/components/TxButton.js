@@ -100,8 +100,7 @@ function TxButton ({
     const txExecute = transformed
       ? api.tx[palletRpc][callable](...transformed)
       : api.tx[palletRpc][callable]();
-console.log({fromAcct,transformed});
-    const unsub = await txExecute.signAndSend(fromAcct, txResHandler)
+     const unsub = await txExecute.signAndSend(fromAcct, txResHandler)
       .catch(txErrHandler);
     setUnsub(() => unsub);
   };
