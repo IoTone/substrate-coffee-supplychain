@@ -74,7 +74,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
                     get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
                     get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
                 ],
-                vec![],
+                vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
                 // permissions
                 vec![
                     (Role { pallet: b"Rbac".to_vec(), permission: Permission::Execute },
@@ -152,7 +152,10 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                 ],
                 [get_account_id_from_seed::<sr25519::Public>("Alice")].to_vec(),
                 vec![],
-                vec![],
+                vec![(
+                    get_account_id_from_seed::<sr25519::Public>("Alice"),
+                    b"Supply Chain Consortium".to_vec(),
+                ) ],
 
                 vec![],
                 true,

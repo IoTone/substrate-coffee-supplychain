@@ -33,9 +33,9 @@ function Main (props) {
           const params = event.data.map(
             (data, index) => `${types[index].type}: ${data.toString()}`
           );
-          console.log({ event });
-          setEventFeed(e => [{
-            icon: 'bell',
+          console.log({eventName});
+           setEventFeed(e => [{
+            icon: eventName.includes("ExtrinsicFailed")?'bug':'bell',
             summary: `${eventName}-${e.length}`,
             extraText: event && event.meta && event.meta.documentation ? event.meta.documentation.join(', ').toString() : '',
             content: params.join(', ')

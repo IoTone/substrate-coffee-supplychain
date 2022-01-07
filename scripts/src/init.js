@@ -5,7 +5,7 @@ import submit from './lib/submit-signed-xt.js';
 import types from './lib/types.js';
 
 async function main() {
-  const provider = new WsProvider("ws://127.0.0.1:9944");
+  const provider = new WsProvider("ws://186.117.170.215:9944");
   const api = await ApiPromise.create({ provider, types });
   const keyring = new Keyring({ type: 'sr25519' });
 
@@ -31,13 +31,13 @@ async function main() {
   try {
     // in order to assign a role, it must be created first
     const executeRegistrar = api.registry.createType("Role", { pallet: 'Registrar', permission: 'Execute' });
-    submit(api, api.tx.rbac.createRole(`Registrar`, 'Execute'), users.admin);
-    const executeProductRegistry = api.registry.createType("Role", { pallet: 'ProductRegistry', permission: 'Execute' });
-    submit(api, api.tx.rbac.createRole(`ProductRegistry`, 'Execute'), users.admin);
-    const executeProductTracking = api.registry.createType("Role", { pallet: 'ProductTracking', permission: 'Execute' });
-    submit(api, api.tx.rbac.createRole(`ProductTracking`, 'Execute'), users.admin);
-    const executeBalances = api.registry.createType("Role", { pallet: 'Balances', permission: 'Execute' });
-    submit(api, api.tx.rbac.createRole(`Balances`, 'Execute'), users.admin);
+    //submit(api, api.tx.rbac.createRole(`Registrar`, 'Execute'), users.admin);
+    const executeProductRegistry = api.registry.createType("Role", { pallet: 'RawMaterials', permission: 'Execute' });
+    submit(api, api.tx.rbac.createRole(`RawMaterials`, 'Execute'), users.admin);
+    // const executeProductTracking = api.registry.createType("Role", { pallet: 'ProductTracking', permission: 'Execute' });
+    // submit(api, api.tx.rbac.createRole(`ProductTracking`, 'Execute'), users.admin);
+    // const executeBalances = api.registry.createType("Role", { pallet: 'Balances', permission: 'Execute' });
+    // submit(api, api.tx.rbac.createRole(`Balances`, 'Execute'), users.admin);
 
     const second = 1000;
     const block = 6.5 * second;
@@ -49,38 +49,21 @@ async function main() {
     // assign roles
     submit(api, api.tx.rbac.assignRole(users.bob.key.address, executeRegistrar), users.admin);
     submit(api, api.tx.rbac.assignRole(users.bob.key.address, executeProductRegistry), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.betty.key.address, executeProductRegistry), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.bob.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.betty.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.bobBank.key.address, executeBalances), users.admin);
 
     submit(api, api.tx.rbac.assignRole(users.charlie.key.address, executeRegistrar), users.admin);
     submit(api, api.tx.rbac.assignRole(users.charlie.key.address, executeProductRegistry), users.admin);
     submit(api, api.tx.rbac.assignRole(users.clarice.key.address, executeProductRegistry), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.charlie.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.clarice.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.charlieBank.key.address, executeBalances), users.admin);
-
     submit(api, api.tx.rbac.assignRole(users.dave.key.address, executeRegistrar), users.admin);
     submit(api, api.tx.rbac.assignRole(users.dave.key.address, executeProductRegistry), users.admin);
     submit(api, api.tx.rbac.assignRole(users.daisy.key.address, executeProductRegistry), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.dave.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.daisy.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.daveBank.key.address, executeBalances), users.admin);
 
     submit(api, api.tx.rbac.assignRole(users.eve.key.address, executeRegistrar), users.admin);
     submit(api, api.tx.rbac.assignRole(users.eve.key.address, executeProductRegistry), users.admin);
     submit(api, api.tx.rbac.assignRole(users.erowid.key.address, executeProductRegistry), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.eve.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.erowid.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.eveBank.key.address, executeBalances), users.admin);
 
     submit(api, api.tx.rbac.assignRole(users.ferdie.key.address, executeRegistrar), users.admin);
     submit(api, api.tx.rbac.assignRole(users.ferdie.key.address, executeProductRegistry), users.admin);
     submit(api, api.tx.rbac.assignRole(users.francis.key.address, executeProductRegistry), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.ferdie.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.francis.key.address, executeProductTracking), users.admin);
-    submit(api, api.tx.rbac.assignRole(users.ferdieBank.key.address, executeBalances), users.admin);
 
     await new Promise(r => setTimeout(r, block));
 
@@ -111,77 +94,9 @@ async function main() {
 
     // create products
     const beef = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(beef, users.bob.key.address, [['desc', 'beef burger']]), users.betty);
+    submit(api, api.tx.rawMaterials.registerRawMaterial(beef, "UnRoasted", users.bob.key.address, undefined, 500), users.betty);
     const veggie = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(veggie, users.bob.key.address, [['desc', 'veggie burger']]), users.betty);
 
-    const ricotta = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(ricotta, users.charlie.key.address, [['desc', 'fresh ricotta']]), users.clarice);
-    const gruyere = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(gruyere, users.charlie.key.address, [['desc', 'aged gruyere']]), users.clarice);
-
-    const bread = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(bread, users.dave.key.address, [['desc', 'bread loaf']]), users.daisy);
-    const rolls = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(rolls, users.dave.key.address, [['desc', 'dinner rolls']]), users.daisy);
-
-    const begonia = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(begonia, users.eve.key.address, [['desc', 'begonia rex']]), users.erowid);
-    const fern = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(fern, users.eve.key.address, [['desc', 'sword fern']]), users.erowid);
-
-    const iris = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(iris, users.ferdie.key.address, [['desc', 'purple iris']]), users.francis);
-    const orchid = uuidv4();
-    submit(api, api.tx.productRegistry.registerProduct(orchid, users.ferdie.key.address, [['desc', 'white orchid']]), users.francis);
-
-    await new Promise(r => setTimeout(r, block));
-
-    const now = Date.now() - 7 * day;
-    const rand = (min, max) => Math.random() * (max - min) + min;
-    const loc = () => { return { latitude: rand(-180.0, 180.0), longitude: rand(-180.0, 180.0) } };
-    // Invalid Transaction: Transaction has a bad signature
-    // const tilt = api.registry.createType('Reading', {
-    //   device_id: 'tilt-dev',
-    //   reading_type: 'Tilt',
-    //   timestamp: now + 2 * hour,
-    //   value: 100,
-    // });
-
-    const bobShipment = uuidv4();
-    submit(api, api.tx.productTracking.registerShipment(bobShipment, users.bob.key.address, [beef, veggie]), users.betty);
-    submit(api, api.tx.productTracking.trackShipment(bobShipment, 'Pickup', now, loc(), null), users.betty);
-    submit(api, api.tx.productTracking.trackShipment(bobShipment, 'Scan', now + day, loc(), null), users.betty);
-    submit(api, api.tx.productTracking.trackShipment(bobShipment, 'Scan', now + rand(2.5, 4.5) * day, loc(), null), users.betty);
-    submit(api, api.tx.productTracking.trackShipment(bobShipment, 'Deliver', now + rand(5.0, 6.5) * day, loc(), null), users.betty);
-
-    const charlieShipment = uuidv4();
-    submit(api, api.tx.productTracking.registerShipment(charlieShipment, users.charlie.key.address, [ricotta, gruyere]), users.clarice);
-    submit(api, api.tx.productTracking.trackShipment(charlieShipment, 'Pickup', now + hour, loc(), null), users.clarice);
-    submit(api, api.tx.productTracking.trackShipment(charlieShipment, 'Scan', now + rand(1.0, 2.5) * day, loc(), null), users.clarice);
-    submit(api, api.tx.productTracking.trackShipment(charlieShipment, 'Scan', now + rand(3.0, 3.5) * day, loc(), null), users.clarice);
-    submit(api, api.tx.productTracking.trackShipment(charlieShipment, 'Deliver', now + rand(4.0, 6.5) * day, loc(), null), users.clarice);
-
-    const daveShipment = uuidv4();
-    submit(api, api.tx.productTracking.registerShipment(daveShipment, users.dave.key.address, [bread, rolls]), users.daisy);
-    submit(api, api.tx.productTracking.trackShipment(daveShipment, 'Pickup', now + rand(1.0, 6.0) * hour, loc(), null), users.daisy);
-    submit(api, api.tx.productTracking.trackShipment(daveShipment, 'Scan', now + day, loc(), null), users.daisy);
-    submit(api, api.tx.productTracking.trackShipment(daveShipment, 'Scan', now + rand(1.5, 3.0) * day, loc(), null), users.daisy);
-    submit(api, api.tx.productTracking.trackShipment(daveShipment, 'Deliver', now + rand(4.0, 6.5) * day, loc(), null), users.daisy);
-
-    const eveShipment = uuidv4();
-    submit(api, api.tx.productTracking.registerShipment(eveShipment, users.eve.key.address, [begonia, fern]), users.erowid);
-    submit(api, api.tx.productTracking.trackShipment(eveShipment, 'Pickup', now + rand(1.0, 12.0) * hour, loc(), null), users.erowid);
-    submit(api, api.tx.productTracking.trackShipment(eveShipment, 'Scan', now + rand(1.5, 3.5) * day, loc(), null), users.erowid);
-    submit(api, api.tx.productTracking.trackShipment(eveShipment, 'Scan', now + rand(4.0, 5.5) * day, loc(), null), users.erowid);
-    submit(api, api.tx.productTracking.trackShipment(eveShipment, 'Deliver', now + rand(6.0, 6.5) * day, loc(), null), users.erowid);
-
-    const ferdieShipment = uuidv4();
-    submit(api, api.tx.productTracking.registerShipment(ferdieShipment, users.ferdie.key.address, [begonia, fern]), users.francis);
-    submit(api, api.tx.productTracking.trackShipment(ferdieShipment, 'Pickup', now + day, loc(), null), users.francis);
-    submit(api, api.tx.productTracking.trackShipment(ferdieShipment, 'Scan', now + rand(2.0, 3.0) * day, loc(), null), users.francis);
-    submit(api, api.tx.productTracking.trackShipment(ferdieShipment, 'Scan', now + rand(4.0, 5.0) * day, loc(), null), users.francis);
-    submit(api, api.tx.productTracking.trackShipment(ferdieShipment, 'Deliver', now + rand(5.0, 6.0) * day, loc(), null), users.francis);
 
     await new Promise(r => setTimeout(r, block));
   } catch (e) {

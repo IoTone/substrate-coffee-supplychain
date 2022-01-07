@@ -3,7 +3,7 @@
   "DEVELOPMENT_KEYRING": true,
   "types": {
     "Address": "MultiAddress",
-   "LookupSource": "MultiAddress",
+    "LookupSource": "MultiAddress",
     "Signature": "Vec<u8>",
     "Attribute": {
       "name": "Vec<u8>",
@@ -22,22 +22,70 @@
     },
     "PropName": "Vec<u8>",
     "PropValue": "Vec<u8>",
-    "ProductProperty": {
-      "name": "PropName",
-      "value": "PropValue"
-    },
-    "ProductId": "Vec<u8>",
     "Product": {
-      "id": "ProductId",
-      "owner": "AccountId",
-      "props": "Option<Vec<ProductProperty>>",
-      "registered": "Moment"
+      "product_id":"ProductId",
+      "date":"Moment",
+      "kind":"Kind",
+      "sku":"SKU",
+      "lb":"Decimal",
+      "amount":"Decimal",
+      "remaining_amount":"Decimal",
+      "price":"Decimal",
+      "packaging_id":"Identifier"
     },
     "Identifier": "Vec<u8>",
     "Decimal": "i32",
     "ShipmentId": "Identifier",
+    "ProductId": "Identifier",
+    "Id": "Identifier",
     "ShippingEventIndex": "u128",
     "DeviceId": "Identifier",
+    "SaleId": "Identifier",
+    "Cost": "Decimal",
+    "SerialNumber": "Vec<u8>",
+    "SKU": "Vec<u8>",
+    "AttributeValue": "Vec<u8>",
+    "Quantity": "Decimal",
+    "Amount": "Decimal",
+    "AmountForProducts": "Decimal",
+    "AmountOfProducts": "Quantity",
+    "RawMaterialId": "Identifier",
+    "OriginProcess": "Identifier",
+    "SupplyProcessId": "Identifier",
+    "Certifications": "Vec<Vec<u8>>",
+    "CurrencyType": "Vec<u8>",
+    "Brand": "Vec<u8>",
+    "Kind": {
+      "_enum": [
+      "Bag",
+      "BagRoasted",
+      "Grinded",
+      "Whole"
+      ]
+  },
+    "Status": {
+      "_enum": [
+        "Sold",
+        "Available"
+      ]
+    },
+    "ProcessType": {
+      "_enum": [
+        "Harvesting",
+        "Processing",
+        "Packaging",
+        "Transporting",
+        "Roasting",
+        "Grinding"
+      ]
+    },
+    "State": {
+      "_enum": [
+        "Grinded",
+        "Roasted",
+        "UnRoasted"
+      ]
+    },
     "ShipmentStatus": {
       "_enum": [
         "Pending",
@@ -45,13 +93,61 @@
         "Delivered"
       ]
     },
-    "Shipment": {
-      "id": "ShipmentId",
-      "owner": "AccountId",
-      "status": "ShipmentStatus",
-      "products": "Vec<ProductId>",
-      "registered": "Moment",
-      "delivered": "Option<Moment>"
+    "AttributeName": {
+      "_enum": [
+        "Location",
+        "Methodology",
+        "PackagingType",
+        "FreightMethod",
+        "RoastingMethod",
+        "GrindingMethod"
+      ]
+    },
+    "ProcessAttribute": {
+      "name": "AttributeName",
+      "value": "AttributeValue"
+    },
+    "SupplyProcess": {
+      "id": "SupplyProcessId",
+      "attribute": "ProcessAttribute",
+      "certifications": "Certifications",
+      "date": "Moment",
+      "amount": "Amount",
+      "archived": "bool",
+      "inputAmount": "Amount",
+      "processType": "ProcessType",
+      "rawMaterialId": "RawMaterialId"
+    },
+    "RawMaterial": {
+      "id": "RawMaterialId",
+      "origin_process": "Option<OriginProcess>",
+      "date": "Moment",
+      "state": "State",
+      "amount": "Amount",
+      "remaining_amount": "Amount"
+    },
+    "Sale": {
+      "id": "Id",
+      "date": "Moment",
+      "currency_type": "CurrencyType",
+      "cost": "Cost",
+      "quantity": "Quantity",
+      "sku": "SKU",
+      "serial_number": "SerialNumber",
+      "user": "AccountId",
+      "buyer": "AccountId"
+    },
+    "RetailPackaging": {
+      "id": "Id",
+      "date": "Moment",
+      "certifications": "Certifications",
+      "amount": "Quantity",
+      "amount_of_products": "AmountOfProducts",
+      "amount_for_products": "AmountForProducts",
+      "sku": "SKU",
+      "serial_number": "SerialNumber",
+      "brand": "Brand",
+      "origin_process": "OriginProcess"
     },
     "ShippingOperation": {
       "_enum": [
@@ -96,7 +192,10 @@
       "value": "Decimal"
     },
     "Permission": {
-      "_enum":{"Execute":1,"Manage":2}
+      "_enum": {
+        "Execute": 1,
+        "Manage": 2
+      }
     },
     "Role": {
       "pallet": "Vec<u8>",

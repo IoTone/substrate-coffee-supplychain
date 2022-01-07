@@ -5,7 +5,8 @@ import { Button } from 'semantic-ui-react';
 import { useSubstrate } from '../';
 import utils from '../utils';
 
-function TxButton ({
+function TxButton ({ 
+  ref=null,
   accountPair = null,
   label,
   setStatus,
@@ -13,7 +14,8 @@ function TxButton ({
   style = null,
   type = 'QUERY',
   attrs = null,
-  disabled = false
+  disabled = false,
+  setClean=()=>{}
 }) {
   // Hooks
   const { api } = useSubstrate();
@@ -98,8 +100,7 @@ function TxButton ({
     const txExecute = transformed
       ? api.tx[palletRpc][callable](...transformed)
       : api.tx[palletRpc][callable]();
-
-    const unsub = await txExecute.signAndSend(fromAcct, txResHandler)
+     const unsub = await txExecute.signAndSend(fromAcct, txResHandler)
       .catch(txErrHandler);
     setUnsub(() => unsub);
   };
@@ -198,10 +199,14 @@ function TxButton ({
 
     return paramFields.every((paramField, ind) => {
       const param = inputParams[ind];
-      if (paramField.optional) { return true; }
-      if (param == null) { return false; }
+       if (paramField.optional) {
+         return true; }
+       if (param == null) { 
+  
+        return false; }
 
       const value = typeof param === 'object' ? param.value : param;
+ 
       return value !== null && value !== '';
     });
   };
@@ -210,14 +215,17 @@ function TxButton ({
     if (!sudoKey || !acctPair) { return false; }
     return acctPair.address === sudoKey;
   };
-
-  return (
+   return (
     <Button
+    ref={ref}
       basic
       color={color}
       style={style}
       type='submit'
-      onClick={transaction}
+      onClick={(e)=>{
+        transaction(e)
+        setClean(e)
+      }}
       disabled={ disabled || !palletRpc || !callable || !allParamsFilled() ||
         ((isSudo() || isUncheckedSudo()) && !isSudoer(accountPair)) }
     >
