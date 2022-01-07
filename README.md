@@ -80,17 +80,7 @@ OR
   ```bash
   cd ui
   yarn install && yarn start
-  ```
-
-- \[Optional\] Run the initialization script to bootstrap a consortium, create organizations,
-  products, and shipments, and track the shipments from creation to delivery. Continue to the
-  [guided demo](#guided-demo) to perform these steps manually, and learn more about them in the
-  process. The initialization script is designed to work on a newly launched chain.
-
-  ```bash
-  cd scripts
-  yarn && yarn start
-  ```
+ 
 
 ## Guided Demo
 
