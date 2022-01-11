@@ -239,3 +239,5 @@ function:
 ## Disclaimer
 
 This project is intended for demonstration purposes and is not audited or ready for production use and was based on (https://github.com/IoTone/substrate-enterprise-sample-v3)
+
+also some of the documentation is based in the node template example' readme  of substrate(https://github.com/substrate-developer-hub/substrate-node-template#readme)
