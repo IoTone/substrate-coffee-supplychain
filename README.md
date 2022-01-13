@@ -236,18 +236,19 @@ function:
   ## IN EVERY STEP YOU CAN TRACK ALL THE MATERIALS, PROCESS, PACKAGINGS AND SALES 
   
   ## Performance and storage 
- Some tests were done with 1 cpu to know the build time and the final space
+ 1. Some tests were done with 1 cpu to know the build time and the final space
 
-whit this specs of the host 
+1. whit this specs of the host 
 ![pc specs](assets/img/demo/spectspc.jpeg)
-a virtual machine was created with 1 cpu and two different configurations
-the first is with the cpu limit at 100% 
+1. a virtual machine was created with 1 cpu and two different configurations
+1. the first is with the cpu limit at 100% 
 ![cpu limit 100](assets/img/demo/cpu100.jpeg)
-the other one is limiting the cpu to 50% of his power 
+1. the other one is limiting the cpu to 50% of his power 
 ![cpu limit 50](assets/img/demo/settingsd50.jpeg)
-and the result was 
+1. and the result was 
 ![cpu limit 50 result ](assets/img/demo/time50.jpeg)
-finally the total space is 
+1. finally the total space is 
+2. 
 ![space](assets/img/demo/space.jpeg)
 
 ## Related Github Repositories
