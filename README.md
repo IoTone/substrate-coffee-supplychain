@@ -117,6 +117,9 @@ OR
   ```bash
   cd ui
   yarn install && yarn start
+
+## Run multiple nodes
+please read the official documentation of substrate (https://docs.substrate.io/tutorials/v3/private-network/)  
  
 
 ## Guided Demo
