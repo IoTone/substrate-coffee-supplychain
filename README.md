@@ -244,9 +244,10 @@ function:
   - rustup target add wasm32-unknown-unknown --toolchain nightly
 
   ## Cross Compiling
-
   To use the software on other platforms, you will need to set up a cross compiler.  See instructions below.
   
+  - install the cross compile of the target on your system, add the new target to the toolchain and compile with the target flag, all the explication here (https://rust-lang.github.io/rustup/cross-compilation.html)
+  the target of arm for the rust toolchain are armv7-unknown-linux-gnueabihf or armv7-unknown-linux-musleabihf
   ### Espressobin Ultra
 
   From the Mac, install:
@@ -259,7 +260,7 @@ function:
 
   TODO
   
-  ## Performance and storage 
+  ## Performance, storage and ram usage
  1. Some tests were done with 1 cpu to know the build time and the final space
 
 1. whit this specs of the host 
@@ -271,9 +272,13 @@ function:
 ![cpu limit 50](assets/img/demo/settingsd50.jpeg)
 1. and the result was 
 ![cpu limit 50 result ](assets/img/demo/time50.jpeg)
-1. finally the total space is 
-2. 
+1. the total space is 
 ![space](assets/img/demo/space.jpeg)
+1. The amount of ram usage when the node is runing is about 79 MB
+1. Amount whit 1gb of ram
+![space](assets/img/demo/ram_usage_1gb.jpeg)
+1. Amount whit 2gb of ram
+![space](assets/img/demo/ram_usage_2gb.jpeg)
 
 ## Related Github Repositories
 
