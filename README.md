@@ -2,7 +2,7 @@
 
 ** Forked from https://github.com/IoTone/substrate-enterprise-sample-v3 **
 
-## *Status:  *
+## Overview
  
 
 This sample project demonstrates how the [Substrate](https://www.substrate.io/) framework for
