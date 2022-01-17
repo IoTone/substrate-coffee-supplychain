@@ -235,6 +235,30 @@ function:
   
   ## IN EVERY STEP YOU CAN TRACK ALL THE MATERIALS, PROCESS, PACKAGINGS AND SALES 
   
+  ## Toolchain
+
+  - Use rustup: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  - Configure your rust: source ~/.cargo/env
+  - rustup update
+  - rustup update nightly
+  - rustup target add wasm32-unknown-unknown --toolchain nightly
+
+  ## Cross Compiling
+
+  To use the software on other platforms, you will need to set up a cross compiler.  See instructions below.
+  
+  ### Espressobin Ultra
+
+  From the Mac, install:
+
+  - brew install aarch64-unknown-linux-gnu
+  - rustup target add aarch64-unknown-linux-gnu
+  - in the chain/.cargo/config file, uncomment both lines
+  
+  ### Raspi 4
+
+  TODO
+  
   ## Performance and storage 
  1. Some tests were done with 1 cpu to know the build time and the final space
 
