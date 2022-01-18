@@ -255,9 +255,18 @@ function:
   - rustup target add aarch64-unknown-linux-gnu
   - in the chain/.cargo/config file, uncomment both lines
   
+  From Windows, install:
+  
+  - Install the toolchain somewhere on your windows system.  You will need to add the path to your toolchain bin directory via the windows control panel system environment PATH. https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-mingw-w64-i686-aarch64-none-linux-gnu.tar.xz
+    - rustup target add aarch64-unknown-linux-gnu
+  - in the chain/.cargo/config file, uncomment both lines
+  - cargo build --target=aarch64-none-linux-gnu
+  
   ### Raspi 4
 
   TODO
+
+  See: https://chacin.dev/blog/cross-compiling-rust-for-the-raspberry-pi/
   
   ## Performance and storage 
  1. Some tests were done with 1 cpu to know the build time and the final space
