@@ -2,7 +2,7 @@
 
 ** Forked from https://github.com/IoTone/substrate-enterprise-sample-v3 **
 
-## *Status:  *
+## Overview
  
 
 This sample project demonstrates how the [Substrate](https://www.substrate.io/) framework for
@@ -65,7 +65,7 @@ Purge the development chain's state:
 Start the development chain with detailed logging:
 
 RUST_BACKTRACE=1 ./target/release/node-template -ldebug --dev
-Development chain means that the state of our chain will be in a tmp folder while the nodes are running. Also, alice account will be authority and sudo account as declared in the [genesis state](https://github.com/substrate-developer-hub/substrate-node-template/blob/main/node/src/ chain_spec.rs#L49). At the same time the following accounts will be prefunded:
+Development chain means that the state of our chain will be in a tmp folder while the nodes are running. Also, alice account will be authority and sudo account as declared in the [genesis state](https://github.com/substrate-developer-hub/substrate-node-template/blob/main/node/src/chain_spec.rs#L49). At the same time the following accounts will be prefunded:
 
 Alice
 Bob
@@ -244,9 +244,10 @@ function:
   - rustup target add wasm32-unknown-unknown --toolchain nightly
 
   ## Cross Compiling
-
   To use the software on other platforms, you will need to set up a cross compiler.  See instructions below.
   
+  - install the cross compile of the target on your system, add the new target to the toolchain and compile with the target flag, all the explication here (https://rust-lang.github.io/rustup/cross-compilation.html)
+  the target of arm for the rust toolchain are armv7-unknown-linux-gnueabihf or armv7-unknown-linux-musleabihf
   ### Espressobin Ultra
 
   From the Mac, install:
@@ -268,7 +269,7 @@ function:
 
   See: https://chacin.dev/blog/cross-compiling-rust-for-the-raspberry-pi/
   
-  ## Performance and storage 
+  ## Performance, storage and ram usage
  1. Some tests were done with 1 cpu to know the build time and the final space
 
 1. whit this specs of the host 
@@ -280,9 +281,13 @@ function:
 ![cpu limit 50](assets/img/demo/settingsd50.jpeg)
 1. and the result was 
 ![cpu limit 50 result ](assets/img/demo/time50.jpeg)
-1. finally the total space is 
-2. 
+1. the total space is 
 ![space](assets/img/demo/space.jpeg)
+1. The amount of ram usage when the node is runing is about 79 MB
+1. Amount whit 1gb of ram
+![space](assets/img/demo/ram_usage_1gb.jpeg)
+1. Amount whit 2gb of ram
+![space](assets/img/demo/ram_usage_2gb.jpeg)
 
 ## Related Github Repositories
 
