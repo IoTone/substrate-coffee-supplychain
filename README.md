@@ -248,10 +248,12 @@ function:
   
   - install the cross compile of the target on your system, add the new target to the toolchain and compile with the target flag, all the explication here (https://rust-lang.github.io/rustup/cross-compilation.html)
   the target of arm for the rust toolchain are armv7-unknown-linux-gnueabihf or armv7-unknown-linux-musleabihf
+
   ### Espressobin Ultra
 
   From the Mac, install:
 
+  - brew tap messense/macos-cross-toolchains
   - brew install aarch64-unknown-linux-gnu
   - rustup target add aarch64-unknown-linux-gnu
   - in the chain/.cargo/config file, uncomment both lines
