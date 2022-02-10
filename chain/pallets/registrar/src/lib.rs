@@ -6,17 +6,20 @@
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 pub use pallet::*;
 
+#[cfg(test)]
+mod mock;
+
 #[frame_support::pallet]
 pub mod pallet {
     use frame_support::{
         dispatch::{DispatchResult, DispatchResultWithPostInfo},
-        pallet_prelude::*, 
+        pallet_prelude::*,
     };
-	use frame_system::pallet_prelude::*;
-    use frame_system::pallet_prelude::{ OriginFor};
-	use sp_std::{prelude::*, vec::Vec, if_std};
+    use frame_system::pallet_prelude::OriginFor;
+    use frame_system::pallet_prelude::*;
+    use sp_std::{if_std, prelude::*, vec::Vec};
 
-	use frame_system::{ensure_signed,RawOrigin};
+    use frame_system::{ensure_signed, RawOrigin};
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
     pub trait Config: frame_system::Config + pallet_did::Config {
@@ -39,8 +42,8 @@ pub mod pallet {
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
-      pub  orgs: Vec<(T::AccountId, Vec<u8>)>,
-      pub  members: Vec<(T::AccountId, Vec<T::AccountId>)>,
+        pub orgs: Vec<(T::AccountId, Vec<u8>)>,
+        pub members: Vec<(T::AccountId, Vec<T::AccountId>)>,
     }
     #[cfg(feature = "std")]
     impl<T: Config> Default for GenesisConfig<T> {
@@ -190,8 +193,7 @@ pub mod pallet {
     impl<T: Config> EnsureOrigin<T::Origin> for EnsureOrg<T> {
         type Success = T::AccountId;
         fn try_origin(o: T::Origin) -> Result<Self::Success, T::Origin> {
-             
-             o.into().and_then(|o| match o {
+            o.into().and_then(|o| match o {
                 RawOrigin::Signed(ref who) if <Pallet<T>>::part_of_organization(&who) => {
                     Ok(who.clone())
                 }
