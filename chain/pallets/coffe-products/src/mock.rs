@@ -1,4 +1,4 @@
-use crate as product_registry;
+use crate as coffe_products;
 use crate::*;
 use frame_support::parameter_types;
 use frame_system as system;
@@ -24,7 +24,7 @@ frame_support::construct_runtime!(
     {
         System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
         Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
-        ProductRegistry: product_registry::{Pallet, Call, Storage, Event<T>},
+        CoffeProducts: coffe_products::{Pallet, Call, Storage, Event<T>},
 
     }
 );
@@ -60,7 +60,7 @@ impl system::Config for Test {
     type OnSetCode = ();
 }
 
-impl product_registry::Config for Test {
+impl coffe_products::Config for Test {
     type Event = Event;
     type CreateRoleOrigin = MockOrigin<Test>;
 }

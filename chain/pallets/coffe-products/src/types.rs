@@ -1,6 +1,5 @@
 use codec::{Decode, Encode};
-use core::fmt;
-use fixed::types::{I16F16, U16F0};
+use fixed::types::I16F16;
 use frame_support::{sp_runtime::RuntimeDebug, sp_std::prelude::*};
 // Custom types
 pub type Identifier = Vec<u8>;
@@ -29,8 +28,8 @@ pub struct Product<Moment> {
     pub lb: Decimal,
     pub amount: Decimal,
     pub remaining_amount: Decimal,
-    pub price:Decimal,
-    pub packaging_id:Identifier
+    pub price: Decimal,
+    pub packaging_id: Identifier,
 }
 
 impl<Moment> Product<Moment> {
@@ -41,8 +40,8 @@ impl<Moment> Product<Moment> {
         sku: SKU,
         lb: Decimal,
         amount: Decimal,
-        price:Decimal,
-        packaging_id:Identifier
+        price: Decimal,
+        packaging_id: Identifier,
     ) -> Self {
         Self {
             product_id: id,
@@ -53,12 +52,12 @@ impl<Moment> Product<Moment> {
             remaining_amount: amount.clone(),
             amount,
             price,
-            packaging_id
+            packaging_id,
         }
     }
 
-    pub fn sell(mut self,amount:Decimal) -> Self {
-        self.remaining_amount = self.remaining_amount-amount;
+    pub fn sell(mut self, amount: Decimal) -> Self {
+        self.remaining_amount = self.remaining_amount - amount;
         self
     }
 }

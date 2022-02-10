@@ -1,128 +1,195 @@
 use super::Event as RawEvent;
-use super::{Config, Product, ProductId, ProductProperty, Products, ProductsOfOrganization};
+use super::{Config, Products, ProductsOfOrganization};
+use crate::types::*;
 use crate::{mock::*, Error};
 
+use fixed::types::extra::U16;
+use fixed::FixedI32;
 use frame_support::{assert_noop, assert_ok, dispatch};
 
-pub fn store_test_product<T: Config>(id: ProductId, owner: T::AccountId, registered: T::Moment) {
+pub fn store_test_product<T: Config>(
+    product_id: ProductId,
+    date: T::Moment,
+    kind: Kind,
+    sku: Vec<u8>,
+    lb: Decimal,
+    amount: Decimal,
+    remaining_amount: Decimal,
+    price: Decimal,
+    packaging_id: Identifier,
+) {
     Products::<T>::insert(
-        id.clone(),
+        product_id.clone(),
         Product {
-            id,
-            owner,
-            registered,
-            props: None,
+            product_id,
+            date,
+            kind,
+            sku,
+            lb,
+            amount,
+            remaining_amount,
+            price,
+            packaging_id,
         },
     );
 }
 
 const TEST_PRODUCT_ID: &str = "00012345600012";
+const TEST_PACKAGING_ID: &str = "00012345678911";
 const TEST_ORGANIZATION: &str = "Northwind";
 const TEST_SENDER: &str = "Alice";
-const LONG_VALUE : &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec aliquam ut tortor nec congue. Pellente";
 
 #[test]
-fn create_product_without_props() {
+fn create_product() {
     new_test_ext().execute_with(|| {
         let sender = account_key(TEST_SENDER);
         let id = TEST_PRODUCT_ID.as_bytes().to_owned();
-        let owner = account_key(TEST_ORGANIZATION);
+        let packaging_id = TEST_PACKAGING_ID.as_bytes().to_owned();
+        let sku = vec![1, 2, 3, 4];
+        let org = account_key(TEST_ORGANIZATION);
         let now = 42;
         Timestamp::set_timestamp(now);
-
-        let result = ProductRegistry::register_product(
+        let result = CoffeProducts::register_product(
             Origin::signed(sender),
             id.clone(),
-            owner.clone(),
-            None,
+            Kind::Grinded,
+            sku,
+            FixedI32::<U16>::from_bits(11 << 16),
+            org,
+            packaging_id,
+            FixedI32::<U16>::from_bits(100 << 16),
+            FixedI32::<U16>::from_bits(11 << 16),
         );
 
         assert_ok!(result);
 
         assert_eq!(
-            ProductRegistry::product_by_id(&id),
+            CoffeProducts::product_by_id(&id),
             Some(Product {
-                id: id.clone(),
-                owner: owner,
-                registered: now,
-                props: None
+                product_id: id.clone(),
+                date: now,
+                kind: Kind::Grinded,
+                sku: vec![1, 2, 3, 4],
+                lb: FixedI32::<U16>::from_bits(11 << 16),
+                amount: FixedI32::<U16>::from_bits(100 << 16),
+                remaining_amount: FixedI32::<U16>::from_bits(100 << 16),
+                price: FixedI32::<U16>::from_bits(11 << 16),
+                packaging_id: TEST_PACKAGING_ID.as_bytes().to_owned()
             })
         );
 
-        assert_eq!(<ProductsOfOrganization<Test>>::get(owner), vec![id.clone()]);
+        assert_eq!(<ProductsOfOrganization<Test>>::get(org), vec![id.clone()]);
 
-        assert_eq!(ProductRegistry::owner_of(&id), Some(owner));
+        // assert_eq!(CoffeProducts::owner_of(&id), Some(org));
 
         // Event is raised
         assert!(System::events().iter().any(|er| er.event
-            == Event::ProductRegistry(RawEvent::ProductRegistered(
-                sender,
-                id.clone(),
-                owner
-            ))));
+            == Event::CoffeProducts(RawEvent::ProductRegistered(sender, id.clone(), org))));
     });
 }
 
-
 #[test]
-fn create_product_with_valid_props() {
+fn create_product_aux() {
     new_test_ext().execute_with(|| {
-        let sender = account_key(TEST_SENDER);
         let id = TEST_PRODUCT_ID.as_bytes().to_owned();
-        let owner = account_key(TEST_ORGANIZATION);
+        let packaging_id = TEST_PACKAGING_ID.as_bytes().to_owned();
+        let sku = vec![1, 2, 3, 4];
+        let org = account_key(TEST_ORGANIZATION);
         let now = 42;
         Timestamp::set_timestamp(now);
-
-        let result = ProductRegistry::register_product(
-            Origin::signed(sender),
+        let result = CoffeProducts::register_product_aux(
             id.clone(),
-            owner.clone(),
-            Some(vec![
-                ProductProperty::new(b"prop1", b"val1"),
-                ProductProperty::new(b"prop2", b"val2"),
-                ProductProperty::new(b"prop3", b"val3"),
-            ]),
+            Kind::Grinded,
+            sku,
+            FixedI32::<U16>::from_bits(11 << 16),
+            org,
+            packaging_id,
+            FixedI32::<U16>::from_bits(100 << 16),
+            FixedI32::<U16>::from_bits(11 << 16),
         );
 
         assert_ok!(result);
 
         assert_eq!(
-            ProductRegistry::product_by_id(&id),
+            CoffeProducts::product_by_id(&id),
             Some(Product {
-                id: id.clone(),
-                owner: owner,
-                registered: now,
-                props: Some(vec![
-                    ProductProperty::new(b"prop1", b"val1"),
-                    ProductProperty::new(b"prop2", b"val2"),
-                    ProductProperty::new(b"prop3", b"val3"),
-                ]),
+                product_id: id.clone(),
+                date: now,
+                kind: Kind::Grinded,
+                sku: vec![1, 2, 3, 4],
+                lb: FixedI32::<U16>::from_bits(11 << 16),
+                amount: FixedI32::<U16>::from_bits(100 << 16),
+                remaining_amount: FixedI32::<U16>::from_bits(100 << 16),
+                price: FixedI32::<U16>::from_bits(11 << 16),
+                packaging_id: TEST_PACKAGING_ID.as_bytes().to_owned()
             })
         );
 
-        assert_eq!(<ProductsOfOrganization<Test>>::get(owner), vec![id.clone()]);
+        assert_eq!(<ProductsOfOrganization<Test>>::get(org), vec![id.clone()]);
 
-        assert_eq!(ProductRegistry::owner_of(&id), Some(owner));
+        // assert_eq!(CoffeProducts::owner_of(&id), Some(org));
+    })
+}
 
-        // Event is raised
-        assert!(System::events().iter().any(|er| er.event
-            == Event::ProductRegistry(RawEvent::ProductRegistered(
-                sender,
-                id.clone(),
-                owner
-            ))));
+#[test]
+fn sell_product() {
+    new_test_ext().execute_with(|| {
+        let id = TEST_PRODUCT_ID.as_bytes().to_owned();
+        let packaging_id = TEST_PACKAGING_ID.as_bytes().to_owned();
+        let sku = vec![1, 2, 3, 4];
+        let now = 42;
+        Timestamp::set_timestamp(now);
+
+        store_test_product::<Test>(
+            id.clone(),
+            now.clone(),
+            Kind::Grinded,
+            sku.clone(),
+            FixedI32::<U16>::from_bits(11 << 16),
+            FixedI32::<U16>::from_bits(100 << 16),
+            FixedI32::<U16>::from_bits(100 << 16),
+            FixedI32::<U16>::from_bits(11 << 16),
+            packaging_id.clone(),
+        );
+        let result = CoffeProducts::sell_product(id.clone(), FixedI32::<U16>::from_bits(60 << 16));
+
+        assert_ok!(result);
+
+        assert_eq!(
+            CoffeProducts::product_by_id(&id),
+            Some(Product {
+                product_id: id.clone(),
+                date: now,
+                kind: Kind::Grinded,
+                sku: vec![1, 2, 3, 4],
+                lb: FixedI32::<U16>::from_bits(11 << 16),
+                amount: FixedI32::<U16>::from_bits(100 << 16),
+                remaining_amount: FixedI32::<U16>::from_bits(40 << 16),
+                price: FixedI32::<U16>::from_bits(11 << 16),
+                packaging_id: TEST_PACKAGING_ID.as_bytes().to_owned()
+            })
+        )
     });
 }
 
 #[test]
 fn create_product_with_invalid_sender() {
     new_test_ext().execute_with(|| {
+        let id = TEST_PRODUCT_ID.as_bytes().to_owned();
+        let packaging_id = TEST_PACKAGING_ID.as_bytes().to_owned();
+        let sku = vec![1, 2, 3, 4];
+        let org = account_key(TEST_ORGANIZATION);
         assert_noop!(
-            ProductRegistry::register_product(
+            CoffeProducts::register_product(
                 Origin::none(),
-                vec!(),
-                account_key(TEST_ORGANIZATION),
-                None
+                id.clone(),
+                Kind::Grinded,
+                sku,
+                FixedI32::<U16>::from_bits(11 << 16),
+                org,
+                packaging_id,
+                FixedI32::<U16>::from_bits(100 << 16),
+                FixedI32::<U16>::from_bits(11 << 16),
             ),
             dispatch::DispatchError::BadOrigin
         );
@@ -132,111 +199,84 @@ fn create_product_with_invalid_sender() {
 #[test]
 fn create_product_with_missing_id() {
     new_test_ext().execute_with(|| {
+        let sender = account_key(TEST_SENDER);
+        let packaging_id = TEST_PACKAGING_ID.as_bytes().to_owned();
+        let sku = vec![1, 2, 3, 4];
+        let org = account_key(TEST_ORGANIZATION);
         assert_noop!(
-            ProductRegistry::register_product(
-                Origin::signed(account_key(TEST_SENDER)),
+            CoffeProducts::register_product(
+                Origin::signed(sender),
                 vec!(),
-                account_key(TEST_ORGANIZATION),
-                None
+                Kind::Grinded,
+                sku,
+                FixedI32::<U16>::from_bits(11 << 16),
+                org,
+                packaging_id,
+                FixedI32::<U16>::from_bits(100 << 16),
+                FixedI32::<U16>::from_bits(11 << 16),
             ),
             Error::<Test>::ProductIdMissing
         );
     });
 }
 
-#[test]
-fn create_product_with_long_id() {
-    new_test_ext().execute_with(|| {
-        assert_noop!(
-            ProductRegistry::register_product(
-                Origin::signed(account_key(TEST_SENDER)),
-                LONG_VALUE.as_bytes().to_owned(),
-                account_key(TEST_ORGANIZATION),
-                None
-            ),
-            Error::<Test>::ProductIdTooLong
-        );
-    })
-}
+// #[test]
+// fn create_product_with_long_id() {
+//     new_test_ext().execute_with(|| {
+//         let packaging_id = TEST_PACKAGING_ID.as_bytes().to_owned();
+//         let sku = vec![1, 2, 3, 4];
+//         let org = account_key(TEST_ORGANIZATION);
+//         assert_noop!(
+//             CoffeProducts::register_product(
+//                 Origin::signed(account_key(TEST_SENDER)),
+//                 LONG_VALUE.as_bytes().to_owned(),
+//                 Kind::Grinded,
+//                 sku,
+//                 FixedI32::<U16>::from_bits(11 << 16),
+//                 org,
+//                 packaging_id,
+//                 FixedI32::<U16>::from_bits(100 << 16),
+//                 FixedI32::<U16>::from_bits(11 << 16),
+//             ),
+//             Error::<Test>::ProductIdTooLong
+//         );
+//     })
+// }
 
 #[test]
 fn create_product_with_existing_id() {
     new_test_ext().execute_with(|| {
         let existing_product = TEST_PRODUCT_ID.as_bytes().to_owned();
-        let now = 42;
+        let sender = account_key(TEST_SENDER);
+        let packaging_id = TEST_PACKAGING_ID.as_bytes().to_owned();
+        let sku = vec![1, 2, 3, 4];
+        let org = account_key(TEST_ORGANIZATION);
 
         store_test_product::<Test>(
             existing_product.clone(),
-            account_key(TEST_ORGANIZATION),
-            now,
+            123,
+            Kind::Grinded,
+            sku.clone(),
+            FixedI32::<U16>::from_bits(11 << 16),
+            FixedI32::<U16>::from_bits(100 << 16),
+            FixedI32::<U16>::from_bits(100 << 16),
+            FixedI32::<U16>::from_bits(11 << 16),
+            packaging_id.clone(),
         );
 
         assert_noop!(
-            ProductRegistry::register_product(
-                Origin::signed(account_key(TEST_SENDER)),
-                existing_product,
-                account_key(TEST_ORGANIZATION),
-                None
+            CoffeProducts::register_product(
+                Origin::signed(sender),
+                existing_product.clone(),
+                Kind::Grinded,
+                sku,
+                FixedI32::<U16>::from_bits(11 << 16),
+                org,
+                packaging_id,
+                FixedI32::<U16>::from_bits(100 << 16),
+                FixedI32::<U16>::from_bits(11 << 16),
             ),
             Error::<Test>::ProductIdExists
-        );
-    })
-}
-
-#[test]
-fn create_product_with_too_many_props() {
-    new_test_ext().execute_with(|| {
-        assert_noop!(
-            ProductRegistry::register_product(
-                Origin::signed(account_key(TEST_SENDER)),
-                TEST_PRODUCT_ID.as_bytes().to_owned(),
-                account_key(TEST_ORGANIZATION),
-                Some(vec![
-                    ProductProperty::new(b"prop1", b"val1"),
-                    ProductProperty::new(b"prop2", b"val2"),
-                    ProductProperty::new(b"prop3", b"val3"),
-                    ProductProperty::new(b"prop4", b"val4")
-                ])
-            ),
-            Error::<Test>::ProductTooManyProps
-        );
-    })
-}
-
-#[test]
-fn create_product_with_invalid_prop_name() {
-    new_test_ext().execute_with(|| {
-        assert_noop!(
-            ProductRegistry::register_product(
-                Origin::signed(account_key(TEST_SENDER)),
-                TEST_PRODUCT_ID.as_bytes().to_owned(),
-                account_key(TEST_ORGANIZATION),
-                Some(vec![
-                    ProductProperty::new(b"prop1", b"val1"),
-                    ProductProperty::new(b"prop2", b"val2"),
-                    ProductProperty::new(&LONG_VALUE.as_bytes().to_owned(), b"val3"),
-                ])
-            ),
-            Error::<Test>::ProductInvalidPropName
-        );
-    })
-}
-
-#[test]
-fn create_product_with_invalid_prop_value() {
-    new_test_ext().execute_with(|| {
-        assert_noop!(
-            ProductRegistry::register_product(
-                Origin::signed(account_key(TEST_SENDER)),
-                TEST_PRODUCT_ID.as_bytes().to_owned(),
-                account_key(TEST_ORGANIZATION),
-                Some(vec![
-                    ProductProperty::new(b"prop1", b"val1"),
-                    ProductProperty::new(b"prop2", b"val2"),
-                    ProductProperty::new(b"prop3", &LONG_VALUE.as_bytes().to_owned()),
-                ])
-            ),
-            Error::<Test>::ProductInvalidPropValue
         );
     })
 }
