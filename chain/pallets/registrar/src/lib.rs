@@ -8,6 +8,8 @@ pub use pallet::*;
 
 #[cfg(test)]
 mod mock;
+#[cfg(test)]
+mod tests;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -17,7 +19,7 @@ pub mod pallet {
     };
     use frame_system::pallet_prelude::OriginFor;
     use frame_system::pallet_prelude::*;
-    use sp_std::{if_std, prelude::*, vec::Vec};
+    use sp_std::{ prelude::*, vec::Vec};
 
     use frame_system::{ensure_signed, RawOrigin};
     /// Configure the pallet by specifying the parameters and types on which it depends.
@@ -59,7 +61,7 @@ pub mod pallet {
         fn build(&self) {
             for org in self.orgs.iter() {
                 match Pallet::<T>::create_org(&org.0, org.1.clone()) {
-                    Err(e) => panic!(e),
+                    Err(e) => panic!("{:?}", e),
                     Ok(_) => (),
                 }
             }
@@ -67,7 +69,7 @@ pub mod pallet {
             for (org, members) in self.members.iter() {
                 for member in members.iter() {
                     match Pallet::<T>::add_to_org(org, member) {
-                        Err(e) => panic!(e),
+                        Err(e) => panic!("{:?}", e),
                         Ok(_) => (),
                     }
                 }

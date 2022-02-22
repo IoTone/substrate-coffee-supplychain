@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-mod types;
+pub mod types;
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
@@ -58,8 +58,7 @@ pub mod pallet {
     // Errors inform users that something went wrong.
     #[pallet::error]
     pub enum Error<T> {
-        RawMaterialIdMissing,
-        RawMaterialIdTooLong,
+        InvalidOrMissingIdentifier,
         RawMaterialIdExists,
         RawMaterialTooManyProps,
         RawMaterialInvalidPropName,
@@ -88,7 +87,10 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             T::CreateRoleOrigin::ensure_origin(origin.clone())?;
             let who = ensure_signed(origin)?;
+            Self::validate_identifier(&id)?;
+            Self::verify_id(&id)?;
             Self::verify_amount(amount.clone())?;
+
             // Create a product instance
             let raw_material = RawMaterial::new(
                 id,
@@ -124,12 +126,29 @@ pub mod pallet {
 
             ensure!(
                 raw_material.remaining_amount - amount >= 0,
-                Error::<T>::RawMaterialIdMissing
+                Error::<T>::InvalidAmount
             );
 
             raw_material = raw_material.subtract_amount(amount);
             <RawMaterials<T>>::insert(&id, raw_material);
 
+            Ok(())
+        }
+        pub fn verify_id(id: &[u8]) -> Result<(), Error<T>> {
+            ensure!(
+                !<RawMaterials<T>>::contains_key(id),
+                Error::<T>::RawMaterialIdExists
+            );
+            Ok(())
+        }
+        // (Public) Validation methods
+        pub fn validate_identifier(id: &[u8]) -> Result<(), Error<T>> {
+            // Basic identifier validation
+            ensure!(!id.is_empty(), Error::<T>::InvalidOrMissingIdentifier);
+            ensure!(
+                id.len() <= PRODUCT_ID_MAX_LENGTH,
+                Error::<T>::InvalidOrMissingIdentifier
+            );
             Ok(())
         }
     }

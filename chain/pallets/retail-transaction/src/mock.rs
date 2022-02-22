@@ -6,7 +6,7 @@ use frame_system as system;
 use frame_system::RawOrigin;
 use sp_core::{sr25519, Pair, H256};
 use sp_runtime::{
-    testing::Header,
+    testing::{Header, TestXt},
     traits::{BlakeTwo256, IdentityLookup},
 };
 
@@ -28,8 +28,7 @@ frame_support::construct_runtime!(
         RetailTransaction: retail_transaction::{Pallet, Call, Storage, Event<T>},
         CoffeProducts: coffe_products::{Pallet, Call, Storage, Event<T>},
         SupplyChain: supply_chain::{Pallet, Call, Storage, Event<T>},
-        RawMaterials: raw_materials::{Pallet, Call, Storage, Event<T>}
-
+        RawMaterials:raw_materials::{Event<T>}
     }
 );
 
@@ -64,9 +63,14 @@ impl system::Config for Test {
     type OnSetCode = ();
 }
 
+impl supply_chain::Config for Test {
+    type CreateRoleOrigin = MockOrigin<Test>;
+    type Event = Event;
+}
 impl retail_transaction::Config for Test {
     type Event = Event;
 }
+
 impl pallet_timestamp::Config for Test {
     type Moment = u64;
     type OnTimestampSet = ();
@@ -77,14 +81,21 @@ impl coffe_products::Config for Test {
     type Event = Event;
     type CreateRoleOrigin = MockOrigin<Test>;
 }
-impl supply_chain::Config for Test {
-    type CreateRoleOrigin = MockOrigin<Test>;
+impl raw_materials::Config for Test {
     type Event = Event;
+    type CreateRoleOrigin = MockOrigin<Test>;
 }
-// impl raw_materials::Config for Test {
-//     type Event = Event;
-//     type CreateRoleOrigin = MockOrigin<Test>;
-// }
+type TestExtrinsic = TestXt<Call, ()>;
+
+impl<C> system::offchain::SendTransactionTypes<C> for Test
+where
+    Call: From<C>,
+{
+    type OverarchingCall = Call;
+    type Extrinsic = TestExtrinsic;
+}
+
+ 
 pub struct MockOrigin<T>(PhantomData<T>);
 
 impl<T: Config> EnsureOrigin<T::Origin> for MockOrigin<T> {

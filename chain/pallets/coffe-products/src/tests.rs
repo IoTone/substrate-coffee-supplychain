@@ -38,6 +38,7 @@ const TEST_PRODUCT_ID: &str = "00012345600012";
 const TEST_PACKAGING_ID: &str = "00012345678911";
 const TEST_ORGANIZATION: &str = "Northwind";
 const TEST_SENDER: &str = "Alice";
+const LONG_VALUE : &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec aliquam ut tortor nec congue. Pellente";
 
 #[test]
 fn create_product() {
@@ -79,10 +80,7 @@ fn create_product() {
         );
 
         assert_eq!(<ProductsOfOrganization<Test>>::get(org), vec![id.clone()]);
-
-        // assert_eq!(CoffeProducts::owner_of(&id), Some(org));
-
-        // Event is raised
+ 
         assert!(System::events().iter().any(|er| er.event
             == Event::CoffeProducts(RawEvent::ProductRegistered(sender, id.clone(), org))));
     });
@@ -127,8 +125,7 @@ fn create_product_aux() {
 
         assert_eq!(<ProductsOfOrganization<Test>>::get(org), vec![id.clone()]);
 
-        // assert_eq!(CoffeProducts::owner_of(&id), Some(org));
-    })
+     })
 }
 
 #[test]
@@ -215,33 +212,33 @@ fn create_product_with_missing_id() {
                 FixedI32::<U16>::from_bits(100 << 16),
                 FixedI32::<U16>::from_bits(11 << 16),
             ),
-            Error::<Test>::ProductIdMissing
+            Error::<Test>::InvalidOrMissingIdentifier
         );
     });
 }
 
-// #[test]
-// fn create_product_with_long_id() {
-//     new_test_ext().execute_with(|| {
-//         let packaging_id = TEST_PACKAGING_ID.as_bytes().to_owned();
-//         let sku = vec![1, 2, 3, 4];
-//         let org = account_key(TEST_ORGANIZATION);
-//         assert_noop!(
-//             CoffeProducts::register_product(
-//                 Origin::signed(account_key(TEST_SENDER)),
-//                 LONG_VALUE.as_bytes().to_owned(),
-//                 Kind::Grinded,
-//                 sku,
-//                 FixedI32::<U16>::from_bits(11 << 16),
-//                 org,
-//                 packaging_id,
-//                 FixedI32::<U16>::from_bits(100 << 16),
-//                 FixedI32::<U16>::from_bits(11 << 16),
-//             ),
-//             Error::<Test>::ProductIdTooLong
-//         );
-//     })
-// }
+#[test]
+fn create_product_with_long_id() {
+    new_test_ext().execute_with(|| {
+        let packaging_id = TEST_PACKAGING_ID.as_bytes().to_owned();
+        let sku = vec![1, 2, 3, 4];
+        let org = account_key(TEST_ORGANIZATION);
+        assert_noop!(
+            CoffeProducts::register_product(
+                Origin::signed(account_key(TEST_SENDER)),
+                LONG_VALUE.as_bytes().to_owned(),
+                Kind::Grinded,
+                sku,
+                FixedI32::<U16>::from_bits(11 << 16),
+                org,
+                packaging_id,
+                FixedI32::<U16>::from_bits(100 << 16),
+                FixedI32::<U16>::from_bits(11 << 16),
+            ),
+            Error::<Test>::InvalidOrMissingIdentifier
+        );
+    })
+}
 
 #[test]
 fn create_product_with_existing_id() {

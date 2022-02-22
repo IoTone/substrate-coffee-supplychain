@@ -9,24 +9,26 @@ pub use pallet::*;
 
 #[cfg(test)]
 mod mock;
+#[cfg(test)]
+mod tests;
 
 #[frame_support::pallet]
 pub mod pallet {
 
     use crate::types::*;
+
     use coffe_products::types::{Decimal, Kind};
-    use fixed::types::I16F16;
-    use frame_support::{
-        dispatch::{DispatchResult, DispatchResultWithPostInfo},
-        ensure,
-        pallet_prelude::*,
-    };
+
+    use frame_support::{dispatch::DispatchResultWithPostInfo, ensure, pallet_prelude::*};
+
+    use frame_system::ensure_signed;
     use frame_system::pallet_prelude::OriginFor;
     use frame_system::pallet_prelude::*;
-    use sp_std::{if_std, prelude::*, vec::Vec};
+
+    use sp_std::{prelude::*, vec::Vec};
+
     pub const IDENTIFIER_MAX_LENGTH: usize = 36;
 
-    use frame_system::{ensure_signed, RawOrigin};
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
     pub trait Config:
@@ -69,10 +71,9 @@ pub mod pallet {
 
     // Pallets use events to inform users when important changes are made.
     // https://substrate.dev/docs/en/knowledgebase/runtime/events
-    #[pallet::event]
+     #[pallet::event]
     #[pallet::metadata(T::AccountId = "AccountId")]
-    #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    pub enum Event<T: Config> {
+     pub enum Event<T: Config> {
         NewSale(T::AccountId, Vec<u8>),
     }
 
@@ -81,6 +82,7 @@ pub mod pallet {
     pub enum Error<T> {
         /// Cannot create the organization because it already exists.
         SaleIdAlreadyExists,
+        RetailPackagingIdAlreadyExists,
         /// Cannot add users to a non-existent organization.
         InvalidCost,
         /// Cannot add a user to an organization to which they already belong.
@@ -140,7 +142,7 @@ pub mod pallet {
 
         #[pallet::weight(10_000)]
         pub fn create_retail_packaging(
-            origin: OriginFor<T>,
+            _origin: OriginFor<T>,
             id: Id,
             certifications: Certifications,
             amount: Decimal,
@@ -154,6 +156,15 @@ pub mod pallet {
             kind: Kind,
             org: T::AccountId,
         ) -> DispatchResultWithPostInfo {
+            Self::validate_identifier(&id)?;
+            Self::validate_new_retail_packaging(&id)?;
+            Self::validate_quantity(amount)?;
+            Self::validate_quantity(amount_of_products)?;
+            Self::validate_quantity(amount_for_products)?;
+            Self::validate_cost(price_for_product)?;
+            let list = <Skus<T>>::get(&org);
+            Self::validate_sku(list, sku.clone())?;
+
             let retail_packaging = RetailPackaging::new(
                 id,
                 <pallet_timestamp::Pallet<T>>::now(),
@@ -167,8 +178,6 @@ pub mod pallet {
                 origin_process,
             );
             let id = retail_packaging.id.clone();
-            let list = <Skus<T>>::get(&org);
-            Self::validate_sku(list,sku.clone())?;
 
             <RetailPackagings<T>>::insert(&id, retail_packaging);
             <RetailPackagingsByOrg<T>>::append(&org, &id);
@@ -207,6 +216,14 @@ pub mod pallet {
             );
             Ok(())
         }
+        pub fn validate_new_retail_packaging(id: &[u8]) -> Result<(), Error<T>> {
+            // Shipment existence check
+            ensure!(
+                !<RetailPackagings<T>>::contains_key(id),
+                Error::<T>::RetailPackagingIdAlreadyExists
+            );
+            Ok(())
+        }
         pub fn validate_quantity(quantity: Quantity) -> Result<(), Error<T>> {
             ensure!(quantity > 0, Error::<T>::InvalidQuantity);
 
@@ -216,8 +233,8 @@ pub mod pallet {
             ensure!(cost > 0, Error::<T>::InvalidCost);
             Ok(())
         }
-        pub fn validate_sku(list:Vec<Vec<u8>>,sku:SKU) -> Result<(), Error<T>> {
-             ensure!(!list.contains(&sku), Error::<T>::InvalidSku);
+        pub fn validate_sku(list: Vec<Vec<u8>>, sku: SKU) -> Result<(), Error<T>> {
+            ensure!(!list.contains(&sku), Error::<T>::InvalidSku);
             Ok(())
         }
     }

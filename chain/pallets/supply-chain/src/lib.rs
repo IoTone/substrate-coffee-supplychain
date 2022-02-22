@@ -1,32 +1,32 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 mod types;
 
-use frame_support::log::debug;
-/// Edit this file to define custom logic or remove it if it is not needed.
-/// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
+
 pub use pallet::*;
 
 #[cfg(test)]
 mod mock;
+#[cfg(test)]
+mod tests;
 
 #[frame_support::pallet]
 pub mod pallet {
+
     use crate::types::*;
-    use codec::alloc::string::ToString;
+
     use frame_support::dispatch::DispatchResultWithPostInfo;
     use frame_support::pallet_prelude::EnsureOrigin;
     use frame_support::pallet_prelude::IsType;
     use frame_support::pallet_prelude::OptionQuery;
     use frame_support::Blake2_128Concat;
-
     use frame_support::pallet_prelude::*;
+
     use frame_system::offchain::SendTransactionTypes;
     use frame_system::pallet_prelude::OriginFor;
     use frame_system::pallet_prelude::*;
-    use sp_runtime::offchain::storage::StorageValueRef;
-    use sp_std::vec;
-    use sp_std::vec::Vec; 
+
+    use sp_std::vec::Vec;
+
     pub const IDENTIFIER_MAX_LENGTH: usize = 36;
     pub const SHIPMENT_MAX_PRODUCTS: usize = 10;
     pub const LISTENER_ENDPOINT: &str = "http://localhost:3005";
@@ -68,7 +68,6 @@ pub mod pallet {
     // https://substrate.dev/docs/en/knowledgebase/runtime/events
     #[pallet::event]
     #[pallet::metadata(T::AccountId = "AccountId")]
-    #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         /// Event documentation should end with an array that provides descriptive names for event
         /// parameters. [something, who]
@@ -79,7 +78,7 @@ pub mod pallet {
     #[pallet::error]
     pub enum Error<T> {
         InvalidOrMissingIdentifier,
-        ProcessAlreadyExists,
+        ProcessIdAlreadyExists,
         ProcessHasBeenDelivered,
         ProcessIsInTransit,
         ProcessIsUnknown,
@@ -100,7 +99,7 @@ pub mod pallet {
         #[pallet::weight(10_000)]
         pub fn register_process(
             origin: OriginFor<T>,
-            id:SupplyProcessId,
+            id: SupplyProcessId,
             attribute: ProcessAttribute,
             certifications: Certifications,
             amount: Amount,
@@ -109,11 +108,16 @@ pub mod pallet {
             raw_material_id: RawMaterialId,
             owner: T::AccountId,
         ) -> DispatchResultWithPostInfo {
-            let who = ensure_signed(origin)?;
-          
+            let _who = ensure_signed(origin)?;
+            Self::verify_id(&id)?;
+            Self::validate_identifier(&id)?;
+
             <raw_materials::Pallet<T>>::verify_amount(amount)?;
             <raw_materials::Pallet<T>>::verify_amount(input_amount)?;
-            <raw_materials::Pallet<T>>::update_remaining_amount(input_amount, raw_material_id.clone())?;
+            <raw_materials::Pallet<T>>::update_remaining_amount(
+                input_amount,
+                raw_material_id.clone(),
+            )?;
             let process = SupplyProcess::new(
                 id,
                 attribute,
@@ -124,45 +128,56 @@ pub mod pallet {
                 process_type,
                 raw_material_id.clone(),
             );
-            let id =process.id.clone();
+            let id = process.id.clone();
             <Processes<T>>::insert(&id, process);
             <ProcessesOfOrganization<T>>::append(&owner, &id);
- 
+
             Ok(().into())
         }
         #[pallet::weight(10_000)]
         pub fn update_process(
             origin: OriginFor<T>,
-            id:SupplyProcessId, 
+            id: SupplyProcessId,
         ) -> DispatchResultWithPostInfo {
-            let who = ensure_signed(origin)?;
-           let process =<Processes<T>>::get(&id);
+            let _who = ensure_signed(origin)?;
+            let process = <Processes<T>>::get(&id);
             let mut process = process.unwrap();
-            process.archived=true;
+            process.archived = true;
             <Processes<T>>::insert(&id, process);
-            
- 
+
             Ok(().into())
         }
-      
     }
 
     #[allow(dead_code)]
     impl<T: Config> Pallet<T> {
-        pub fn get_bean_status(id:SupplyProcessId)->i8{
-          let process=  <Processes<T>>::get(&id);
-          match process{
-              Some(p)=>{
-                 match p.process_type {
-                    ProcessType::  Harvesting=>0,
-                    ProcessType::Processing=>0, 
-                    ProcessType::Roasting=>1,
-                    ProcessType::Grinding=>2,
-                    _=>0
-                 }  
-              },
-              None=>0
-          }
+        pub fn verify_id(id: &[u8]) -> Result<(), Error<T>> {
+            ensure!(
+                !<Processes<T>>::contains_key(id),
+                Error::<T>::ProcessIdAlreadyExists
+            );
+            Ok(())
+        }
+        pub fn validate_identifier(id: &[u8]) -> Result<(), Error<T>> {
+            ensure!(!id.is_empty(), Error::<T>::InvalidOrMissingIdentifier);
+            ensure!(
+                id.len() <= IDENTIFIER_MAX_LENGTH,
+                Error::<T>::InvalidOrMissingIdentifier
+            );
+            Ok(())
+        }
+        pub fn get_bean_status(id: SupplyProcessId) -> i8 {
+            let process = <Processes<T>>::get(&id);
+            match process {
+                Some(p) => match p.process_type {
+                    ProcessType::Harvesting => 0,
+                    ProcessType::Processing => 0,
+                    ProcessType::Roasting => 1,
+                    ProcessType::Grinding => 2,
+                    _ => 0,
+                },
+                None => 0,
+            }
         }
     }
 }
