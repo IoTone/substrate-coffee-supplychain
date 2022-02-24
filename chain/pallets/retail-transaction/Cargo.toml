@@ -28,6 +28,11 @@ path = '../supply-chain'
 default-features = false
 package = 'pallet-coffe-products'
 path = '../coffe-products'
+
+[dependencies.raw-materials]
+default-features = false
+package = 'pallet-raw-materials'
+path = '../raw-materials'
  
  [dependencies]
 codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '2.0.0' }
@@ -36,7 +41,7 @@ frame-support = { default-features = false,  git= 'https://github.com/paritytech
 frame-benchmarking = { default-features = false, optional = true,git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.1.0' }
 sp-std = { default-features = false, git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'  }
 pallet-did = { default-features = false, git= 'https://github.com/Damfortx8/pallet-did',branch='master',   version = '3.0.0'  }
- pallet-timestamp = { default_features = false,git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'}
+pallet-timestamp = { default_features = false,git= 'https://github.com/paritytech/substrate.git', tag = 'monthly-2021-07', version = '3.0.0'}
 
 serde = { version = "1.0.119" }
 [dev-dependencies]
@@ -52,6 +57,7 @@ std = [
 	'frame-system/std',
 	'pallet-timestamp/std',
     'supply-chain/std',
+    'raw-materials/std',
     'coffe-products/std',
 	'frame-benchmarking/std',
     'pallet-did/std',

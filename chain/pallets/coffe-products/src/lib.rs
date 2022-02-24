@@ -5,17 +5,15 @@ pub mod types;
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
 pub use pallet::*;
-// #[cfg(test)]
-// mod mock;
-// mod types;
+#[cfg(test)]
+mod mock;
 
-// #[cfg(test)]
-// mod tests;
+#[cfg(test)]
+mod tests;
 
 #[frame_support::pallet]
 pub mod pallet {
     use crate::types::*;
-    use fixed::types::{U128F0, U16F0};
     use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
     use frame_system::pallet_prelude::*;
     use sp_std::{prelude::*, vec::Vec};
@@ -25,7 +23,7 @@ pub mod pallet {
     pub const PRODUCT_PROP_NAME_MAX_LENGTH: usize = 10;
     pub const PRODUCT_PROP_VALUE_MAX_LENGTH: usize = 20;
     pub const PRODUCT_MAX_PROPS: usize = 3;
-
+ 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
     pub trait Config: frame_system::Config + pallet_timestamp::Config {
@@ -74,9 +72,8 @@ pub mod pallet {
 
     // Errors inform users that something went wrong.
     #[pallet::error]
-    pub enum Error<T> {
-        ProductIdMissing,
-        ProductIdTooLong,
+    pub enum Error<T> { 
+        InvalidOrMissingIdentifier,
         ProductIdExists,
         ProductTooManyProps,
         ProductInvalidPropName,
@@ -115,6 +112,8 @@ pub mod pallet {
                 packaging_id.clone(),
             );
             let id = product.product_id.clone();
+            Self::validate_identifier(&id)?;
+            Self::verify_id(&id)?;
             let who = ensure_signed(origin)?;
 
             <Products<T>>::insert(&id, product);
@@ -168,5 +167,23 @@ pub mod pallet {
             <Products<T>>::insert(&id, product);
             Ok(())
         }
+        pub fn verify_id(id: &[u8]) -> Result<(), Error<T>> {
+            ensure!(
+                !<Products<T>>::contains_key(id),
+                Error::<T>::ProductIdExists
+            );
+            Ok(())
+        }
+          // (Public) Validation methods
+          pub fn validate_identifier(id: &[u8]) -> Result<(), Error<T>> {
+            // Basic identifier validation
+            ensure!(!id.is_empty(), Error::<T>::InvalidOrMissingIdentifier);
+            ensure!(
+                id.len() <= PRODUCT_ID_MAX_LENGTH,
+                Error::<T>::InvalidOrMissingIdentifier
+            );
+            Ok(())
+        }
+         
     }
 }

@@ -1,8 +1,7 @@
 // Creating mock runtime here
-use crate as supply_chain;
+use crate as retail_transaction;
 use crate::*;
-use core::marker::PhantomData;
-use frame_support::{parameter_types, traits::EnsureOrigin};
+use frame_support::parameter_types;
 use frame_system as system;
 use frame_system::RawOrigin;
 use sp_core::{sr25519, Pair, H256};
@@ -11,31 +10,31 @@ use sp_runtime::{
     traits::{BlakeTwo256, IdentityLookup},
 };
 
-pub use pallet_timestamp::Call as TimestampCall;
-
+use core::marker::PhantomData;
+use frame_support::traits::EnsureOrigin;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
-
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
-	pub enum Test where
-		Block = Block,
+    pub enum Test where
+        Block = Block,
         NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic
-	{
-		System: system::{Pallet, Call, Config, Storage, Event<T>},
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
         Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
-		SupplyChain: supply_chain::{Pallet, Call, Storage, Event<T>},
-        RawMaterials: raw_materials::{Pallet, Call, Storage, Event<T>}
-	}
+        RetailTransaction: retail_transaction::{Pallet, Call, Storage, Event<T>},
+        CoffeProducts: coffe_products::{Pallet, Call, Storage, Event<T>},
+        SupplyChain: supply_chain::{Pallet, Call, Storage, Event<T>},
+        RawMaterials:raw_materials::{Event<T>}
+    }
 );
 
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
     pub const SS58Prefix: u8 = 42;
-    // pub const MinimumPeriod: u64 = 1;
 }
 
 impl system::Config for Test {
@@ -64,30 +63,40 @@ impl system::Config for Test {
     type OnSetCode = ();
 }
 
+impl supply_chain::Config for Test {
+    type CreateRoleOrigin = MockOrigin<Test>;
+    type Event = Event;
+}
+impl retail_transaction::Config for Test {
+    type Event = Event;
+}
+
 impl pallet_timestamp::Config for Test {
     type Moment = u64;
     type OnTimestampSet = ();
     type MinimumPeriod = ();
     type WeightInfo = ();
 }
-
-impl supply_chain::Config for Test {
-    type CreateRoleOrigin = MockOrigin<Test>;
+impl coffe_products::Config for Test {
     type Event = Event;
+    type CreateRoleOrigin = MockOrigin<Test>;
 }
-
 impl raw_materials::Config for Test {
     type Event = Event;
     type CreateRoleOrigin = MockOrigin<Test>;
 }
+type TestExtrinsic = TestXt<Call, ()>;
 
+impl<C> system::offchain::SendTransactionTypes<C> for Test
+where
+    Call: From<C>,
+{
+    type OverarchingCall = Call;
+    type Extrinsic = TestExtrinsic;
+}
 
+ 
 pub struct MockOrigin<T>(PhantomData<T>);
-
-
-// pub type ProductTracking = Pallet<Test>;
-// pub type Timestamp = pallet_timestamp::Pallet<Test>;
-
 
 impl<T: Config> EnsureOrigin<T::Origin> for MockOrigin<T> {
     type Success = T::AccountId;
@@ -101,28 +110,21 @@ impl<T: Config> EnsureOrigin<T::Origin> for MockOrigin<T> {
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-
 pub fn account_key(s: &str) -> sr25519::Public {
     sr25519::Pair::from_string(&format!("//{}", s), None)
         .expect("static values are valid; qed")
         .public()
 }
 
-// Offchain worker
-
-type TestExtrinsic = TestXt<Call, ()>;
-
-impl<C> system::offchain::SendTransactionTypes<C> for Test
-where
-    Call: From<C>,
-{
-    type OverarchingCall = Call;
-    type Extrinsic = TestExtrinsic;
-}
-
+// Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    let t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
-    let mut ext = sp_io::TestExternalities::new(t);
+    let storage = frame_system::GenesisConfig::default()
+        .build_storage::<Test>()
+        .unwrap();
+
+    let mut ext = sp_io::TestExternalities::from(storage);
+    // Events are not emitted on block 0 -> advance to block 1.
+    // Any dispatchable calls made during genesis block will have no events emitted.
     ext.execute_with(|| System::set_block_number(1));
-    ext   
+    ext
 }

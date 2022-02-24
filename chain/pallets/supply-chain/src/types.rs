@@ -1,5 +1,4 @@
 use codec::{Decode, Encode};
-use core::fmt;
 use fixed::types::I16F16;
 use frame_support::{sp_runtime::RuntimeDebug, sp_std::prelude::*}; 
 // Custom types
